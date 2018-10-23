@@ -11,7 +11,7 @@ input_size = 7
 output_size = 1
 lr = 0.0006  # 学习率
 # ——————————————————导入数据——————————————————————
-f = open('C:\\Users\\Administrator\\Desktop\\dataset_2.csv')
+f = open('dataset_2.csv')
 df = pd.read_csv(f)  # 读入股票数据
 data = df.iloc[:, 2:10].values  # 取第3-10列
 
