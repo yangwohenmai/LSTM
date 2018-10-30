@@ -13,7 +13,7 @@ def parser(x):
 series = read_csv('data_set/shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True,
                   date_parser=parser)
 
-# 分成训练和测试集合
+# 分成训练和测试集合，前14列给训练集，后12行给测试集
 X = series.values
 train, test = X[0:-12], X[-12:]
 
@@ -25,7 +25,9 @@ train, test = X[0:-12], X[-12:]
 2、预测一次，并保存预测结构，用于之后的验证
 3、加入的测试数据作为下一次迭代的训练数据
 '''
+#把数组train赋值给一个history列表
 history = [x for x in train]
+#创建一个predictions列表
 predictions = list()
 for i in range(len(test)):
     predictions.append(history[-1])  # history[-1],就是执行预测
