@@ -1,0 +1,16 @@
+    using this data and frame a forecasting problem where,given the weather conditions and
+pollution for prior hours,we forecast the pollution at the next hour.
+
+No: row number
+year:
+month:
+day:
+hour:
+pm2.5: PM2.5 concentration
+DEWP: 露点
+TEMP: temperature 温度
+PRES: pressure 气压
+cbwd: Combined wind direction 结合风向
+lws:  Cumulated wind speed 累计风速
+ls: Cumulated hour of snow 累计小时的雪量
+lr: Cumulated hour of rain 累计小时的雨量
