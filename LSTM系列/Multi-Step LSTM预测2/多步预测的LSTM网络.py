@@ -15,7 +15,7 @@ from numpy import array
 
 # date-time parsing function for loading the dataset
 def parser(x):
-    return datetime.strptime('190' + x, '%Y-%m')
+    return datetime.strptime(x, '%Y/%m/%d')
 
 
 # convert time series into supervised learning problem
@@ -166,7 +166,7 @@ def plot_forecasts(series, forecasts, n_test):
 
 
 # load dataset
-series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
+series = read_csv('data_set/shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 # configure
 n_lag = 1
 n_seq = 3
