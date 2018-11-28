@@ -78,41 +78,42 @@ def fit_lstm(train, n_lag, n_seq, n_batch, nb_epoch, n_neurons):
     # 重塑训练数据格式 [samples, timesteps, features]
     X, y = train[:, 0:n_lag], train[:, n_lag:]
     X = X.reshape(X.shape[0], 1, X.shape[1])
-    # 设计网络
+    # 配置一个LSTM神经网络，添加网络参数
     model = Sequential()
     model.add(LSTM(n_neurons, batch_input_shape=(n_batch, X.shape[1], X.shape[2]), stateful=True))
     model.add(Dense(y.shape[1]))
     model.compile(loss='mean_squared_error', optimizer='adam')
-    # 调用网络
+    # 调用网络，迭代数据对神经网络进行训练，最后输出训练好的网络模型
     for i in range(nb_epoch):
         model.fit(X, y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
         model.reset_states()
     return model
 
 
-# 用LSTM做一个预测
+# 用LSTM做预测
 def forecast_lstm(model, X, n_batch):
     # 重构输入参数 [samples, timesteps, features]
     X = X.reshape(1, 1, len(X))
-    # make forecast
+    # 开始预测
     forecast = model.predict(X, batch_size=n_batch)
-    # 转换成数组
+    # 结果转换成数组
     return [x for x in forecast[0, :]]
 
 
-# 评估持久性模型
+# 利用训练好的网络模型，对测试数据进行预测
 def make_forecasts(model, n_batch, train, test, n_lag, n_seq):
     forecasts = list()
+    # 预测方式是用一个X值预测出后三步的Y值
     for i in range(len(test)):
         X, y = test[i, 0:n_lag], test[i, n_lag:]
-        # 开始预测
+        # 调用训练好的模型预测未来数据
         forecast = forecast_lstm(model, X, n_batch)
-        # 存储预中间数据
+        # 将预测的数据保存
         forecasts.append(forecast)
     return forecasts
 
 
-# 对预测后的值进行反转
+# 对预测后的缩放值（-1，1）进行逆变换
 def inverse_difference(last_ob, forecast):
     # invert first forecast
     inverted = list()
@@ -123,21 +124,22 @@ def inverse_difference(last_ob, forecast):
     return inverted
 
 
-# 预测数据的逆变换
+# 对预测完成的数据进行逆变换
 def inverse_transform(series, forecasts, scaler, n_test):
     inverted = list()
     for i in range(len(forecasts)):
         # create array from forecast
         forecast = array(forecasts[i])
         forecast = forecast.reshape(1, len(forecast))
-        # invert scaling
+        # 将预测后的数据缩放逆转换
         inv_scale = scaler.inverse_transform(forecast)
         inv_scale = inv_scale[0, :]
         # invert differencing
         index = len(series) - n_test + i - 1
         last_ob = series.values[index]
+        # 将预测后的数据差值逆转换
         inv_diff = inverse_difference(last_ob, inv_scale)
-        # store
+        # 保存数据
         inverted.append(inv_diff)
     return inverted
 
@@ -181,11 +183,12 @@ scaler, train, test = prepare_data(series, n_test, n_lag, n_seq)
 model = fit_lstm(train, n_lag, n_seq, n_batch, n_epochs, n_neurons)
 # 开始预测
 forecasts = make_forecasts(model, n_batch, train, test, n_lag, n_seq)
-# inverse transform forecasts and test
+# 逆转换训练数据和预测数据
 forecasts = inverse_transform(series, forecasts, scaler, n_test + 2)
+# 逆转换测试数据
 actual = [row[n_lag:] for row in test]
 actual = inverse_transform(series, actual, scaler, n_test + 2)
-# evaluate forecasts
+# 比较预测数据和测试数据，计算两者之间的损失值
 evaluate_forecasts(actual, forecasts, n_lag, n_seq)
-# plot forecasts
+# 画图
 plot_forecasts(series, forecasts, n_test + 2)
