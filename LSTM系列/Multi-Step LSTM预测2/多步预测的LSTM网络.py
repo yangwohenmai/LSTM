@@ -13,12 +13,12 @@ from matplotlib import pyplot
 from numpy import array
 
 
-# date-time parsing function for loading the dataset
+# 加载数据集
 def parser(x):
     return datetime.strptime(x, '%Y/%m/%d')
 
 
-# convert time series into supervised learning problem
+# 将时间序列转换为监督类型的数据序列
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     n_vars = 1 if type(data) is list else data.shape[1]
     df = DataFrame(data)
@@ -40,6 +40,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     # drop rows with NaN values
     if dropnan:
         agg.dropna(inplace=True)
+    print(agg)
     return agg
 
 
@@ -52,66 +53,66 @@ def difference(dataset, interval=1):
     return Series(diff)
 
 
-# transform series into train and test sets for supervised learning
+# 将序列转换为用于监督学习的训练和测试集
 def prepare_data(series, n_test, n_lag, n_seq):
-    # extract raw values
+    # 提取原始值
     raw_values = series.values
-    # transform data to be stationary
+    # 将数据转换为静态的
     diff_series = difference(raw_values, 1)
     diff_values = diff_series.values
     diff_values = diff_values.reshape(len(diff_values), 1)
-    # rescale values to -1, 1
+    # 重新调整数据为（-1,1）之间
     scaler = MinMaxScaler(feature_range=(-1, 1))
     scaled_values = scaler.fit_transform(diff_values)
     scaled_values = scaled_values.reshape(len(scaled_values), 1)
-    # transform into supervised learning problem X, y
+    # 转化为有监督的数据X，y
     supervised = series_to_supervised(scaled_values, n_lag, n_seq)
     supervised_values = supervised.values
-    # split into train and test sets
+    # 分割为测试数据和训练数据
     train, test = supervised_values[0:-n_test], supervised_values[-n_test:]
     return scaler, train, test
 
 
-# fit an LSTM network to training data
+# 匹配LSTM网络训练数据
 def fit_lstm(train, n_lag, n_seq, n_batch, nb_epoch, n_neurons):
-    # reshape training into [samples, timesteps, features]
+    # 重塑训练数据格式 [samples, timesteps, features]
     X, y = train[:, 0:n_lag], train[:, n_lag:]
     X = X.reshape(X.shape[0], 1, X.shape[1])
-    # design network
+    # 设计网络
     model = Sequential()
     model.add(LSTM(n_neurons, batch_input_shape=(n_batch, X.shape[1], X.shape[2]), stateful=True))
     model.add(Dense(y.shape[1]))
     model.compile(loss='mean_squared_error', optimizer='adam')
-    # fit network
+    # 调用网络
     for i in range(nb_epoch):
         model.fit(X, y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
         model.reset_states()
     return model
 
 
-# make one forecast with an LSTM,
+# 用LSTM做一个预测
 def forecast_lstm(model, X, n_batch):
-    # reshape input pattern to [samples, timesteps, features]
+    # 重构输入参数 [samples, timesteps, features]
     X = X.reshape(1, 1, len(X))
     # make forecast
     forecast = model.predict(X, batch_size=n_batch)
-    # convert to array
+    # 转换成数组
     return [x for x in forecast[0, :]]
 
 
-# evaluate the persistence model
+# 评估持久性模型
 def make_forecasts(model, n_batch, train, test, n_lag, n_seq):
     forecasts = list()
     for i in range(len(test)):
         X, y = test[i, 0:n_lag], test[i, n_lag:]
-        # make forecast
+        # 开始预测
         forecast = forecast_lstm(model, X, n_batch)
-        # store the forecast
+        # 存储预中间数据
         forecasts.append(forecast)
     return forecasts
 
 
-# invert differenced forecast
+# 对预测后的值进行反转
 def inverse_difference(last_ob, forecast):
     # invert first forecast
     inverted = list()
@@ -122,7 +123,7 @@ def inverse_difference(last_ob, forecast):
     return inverted
 
 
-# inverse data transform on forecasts
+# 预测数据的逆变换
 def inverse_transform(series, forecasts, scaler, n_test):
     inverted = list()
     for i in range(len(forecasts)):
@@ -141,7 +142,7 @@ def inverse_transform(series, forecasts, scaler, n_test):
     return inverted
 
 
-# evaluate the RMSE for each forecast time step
+# 评估每个预测时间步的RMSE
 def evaluate_forecasts(test, forecasts, n_lag, n_seq):
     for i in range(n_seq):
         actual = [row[i] for row in test]
@@ -150,7 +151,7 @@ def evaluate_forecasts(test, forecasts, n_lag, n_seq):
         print('t+%d RMSE: %f' % ((i + 1), rmse))
 
 
-# plot the forecasts in the context of the original dataset
+# 在原始数据集的上下文中绘制预测图
 def plot_forecasts(series, forecasts, n_test):
     # plot the entire dataset in blue
     pyplot.plot(series.values)
@@ -165,20 +166,20 @@ def plot_forecasts(series, forecasts, n_test):
     pyplot.show()
 
 
-# load dataset
+# 加载数据
 series = read_csv('data_set/shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
-# configure
+# 配置网络
 n_lag = 1
 n_seq = 3
 n_test = 10
 n_epochs = 1500
 n_batch = 1
 n_neurons = 1
-# prepare data
+# 准备数据
 scaler, train, test = prepare_data(series, n_test, n_lag, n_seq)
-# fit model
+# 准备预测模型
 model = fit_lstm(train, n_lag, n_seq, n_batch, n_epochs, n_neurons)
-# make forecasts
+# 开始预测
 forecasts = make_forecasts(model, n_batch, train, test, n_lag, n_seq)
 # inverse transform forecasts and test
 forecasts = inverse_transform(series, forecasts, scaler, n_test + 2)
