@@ -23,28 +23,28 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     n_vars = 1 if type(data) is list else data.shape[1]
     df = DataFrame(data)
     cols, names = list(), list()
-    # input sequence (t-n, ... t-1)
+    # 这个for循环是用来输入列标题的 var1(t-1)，var1(t)，var1(t+1)，var1(t+2)
     for i in range(n_in, 0, -1):
         cols.append(df.shift(i))
         names += [('var%d(t-%d)' % (j + 1, i)) for j in range(n_vars)]
-    # forecast sequence (t, t+1, ... t+n)
+    # 转换为监督型数据的预测序列 每四个一组，对应 var1(t-1)，var1(t)，var1(t+1)，var1(t+2)
     for i in range(0, n_out):
         cols.append(df.shift(-i))
         if i == 0:
             names += [('var%d(t)' % (j + 1)) for j in range(n_vars)]
         else:
             names += [('var%d(t+%d)' % (j + 1, i)) for j in range(n_vars)]
-    # put it all together
+    # 拼接数据
     agg = concat(cols, axis=1)
     agg.columns = names
-    # drop rows with NaN values
+    # 把null值转换为0
     if dropnan:
         agg.dropna(inplace=True)
     print(agg)
     return agg
 
 
-# create a differenced series
+# 对传入的数列做差分操作，相邻两值相减
 def difference(dataset, interval=1):
     diff = list()
     for i in range(interval, len(dataset)):
@@ -172,7 +172,7 @@ series = read_csv('data_set/shampoo-sales.csv', header=0, parse_dates=[0], index
 n_lag = 1
 n_seq = 3
 n_test = 10
-n_epochs = 1500
+n_epochs = 15
 n_batch = 1
 n_neurons = 1
 # 准备数据
