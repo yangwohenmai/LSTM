@@ -170,7 +170,7 @@ def plot_forecasts(series, forecasts, n_test):
 
 # 加载数据
 series = read_csv('data_set/shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
-# 配置网络
+# 配置网络信息
 n_lag = 1
 n_seq = 3
 n_test = 10
