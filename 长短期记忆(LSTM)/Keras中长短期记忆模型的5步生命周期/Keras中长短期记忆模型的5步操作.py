@@ -29,3 +29,20 @@ print(loss)
 # 5. 利用训练好的模型，带入原始的X进行单步预测
 predictions = model.predict(X, verbose=0)
 print(predictions[:, 0])
+
+
+
+# 创建一个0.1~0.9的序列
+length = 10
+sequence = [(i+5)/float(length) for i in range(length)]
+print(sequence)
+# 构建一个X->y的映射关系
+df = DataFrame(sequence)
+df = concat([df.shift(1), df], axis=1)
+df.dropna(inplace=True)
+# 使用reshape方法，把序列转换为LSTM可识别的数组格式
+values = df.values
+X, y = values[:, 0], values[:, 1]
+X = X.reshape(len(X), 1, 1)
+predictions = model.predict(X, verbose=0)
+print(predictions[:, 0])
