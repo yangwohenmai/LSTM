@@ -1,20 +1,20 @@
 from pandas import Series
 from sklearn.preprocessing import StandardScaler
 from math import sqrt
-# define contrived series
+# 手动定义一个待标准化序列
 data = [1.0, 5.5, 9.0, 2.6, 8.8, 3.0, 4.1, 7.9, 6.3]
 series = Series(data)
 print(series)
-# prepare data for normalization
+# 准备标准化数据格式
 values = series.values
 values = values.reshape((len(values), 1))
-# train the normalization
+# 配置标准化方法StandardScaler
 scaler = StandardScaler()
 scaler = scaler.fit(values)
 print('Mean: %f, StandardDeviation: %f' % (scaler.mean_, sqrt(scaler.var_)))
-# normalize the dataset and print
+# 输出标准化后的数据
 standardized = scaler.transform(values)
 print(standardized)
-# inverse transform and print
+# 标准化数据的逆转换
 inversed = scaler.inverse_transform(standardized)
 print(inversed)
