@@ -9,12 +9,20 @@ sequence = [i/float(length) for i in range(length)]
 print(sequence)
 # 构建一个X->y的映射关系
 df = DataFrame(sequence)
+print(df)
 df = concat([df.shift(1), df], axis=1)
+print(df)
 df.dropna(inplace=True)
+print(df)
 # 使用reshape方法，把序列转换为LSTM可识别的数组格式
 values = df.values
+print(values)
 X, y = values[:, 0], values[:, 1]
+print(X)
+print(X.shape)
 X = X.reshape(len(X), 1, 1)
+print(X.shape)
+print(X)
 # 1. 定义网络类型
 model = Sequential()
 model.add(LSTM(10, input_shape=(1,1)))
