@@ -85,14 +85,17 @@ print(X.shape)
  [[0.7]]
  [[0.8]]]
  (9, 1, 1)
+ (9, 1, 1)代表9个样本，每个样本步长为1，并且有1个特征值
  """
 X = X.reshape(len(X), 1, 1)
 print(X.shape)
 print(X)
 
-# 1. 定义网络类型
+# 1. 定义网络类型，Sequential是一个参数容器
 model = Sequential()
+# 由存储器单元组成的LSTM循环层称为LSTM（），input_shape（步长，特征值），可以指定input_shape参数，该参数需要包含时间步长和特征值的元组
 model.add(LSTM(10, input_shape=(1,1)))
+# 通常跟随LSTM层并用于输出预测的完全连接层称为Dense（）。
 model.add(Dense(1))
 # 2. 编译网络，设置损失参数
 model.compile(optimizer='adam', loss='mean_squared_error')
