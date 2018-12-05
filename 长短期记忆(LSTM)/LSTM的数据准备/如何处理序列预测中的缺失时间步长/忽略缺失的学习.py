@@ -7,7 +7,7 @@ from keras.layers import LSTM
 from keras.layers import Dense
 from keras.layers import Masking
 
-# generate a sequence of random values
+# 生成一系列随机值
 def generate_sequence(n_timesteps):
 	return [random() for _ in range(n_timesteps)]
 
@@ -19,7 +19,7 @@ def generate_data(n_timesteps):
 	# create lag
 	df = DataFrame(sequence)
 	df = concat([df.shift(1), df], axis=1)
-	# replace missing values with -1
+	#将NAN值替换为-1
 	df.fillna(-1, inplace=True)
 	values = df.values
 	# specify input and output data
@@ -30,8 +30,9 @@ def generate_data(n_timesteps):
 	return X, y
 
 n_timesteps = 10
-# define model
+# 定义网络
 model = Sequential()
+# mask_value=-1使得网络对-1的值进行忽略，不进行学习
 model.add(Masking(mask_value=-1, input_shape=(2, 1)))
 model.add(LSTM(5))
 model.add(Dense(1))
@@ -40,7 +41,7 @@ model.compile(loss='mean_squared_error', optimizer='adam')
 for i in range(500):
 	X, y = generate_data(n_timesteps)
 	model.fit(X, y, epochs=1, batch_size=1, verbose=2)
-# evaluate model on new data
+# 评估数据模型
 X, y = generate_data(n_timesteps)
 yhat = model.predict(X)
 for i in range(len(X)):
