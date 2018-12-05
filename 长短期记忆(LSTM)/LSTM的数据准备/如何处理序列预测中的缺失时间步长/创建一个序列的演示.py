@@ -24,7 +24,6 @@ def generate_data(n_timesteps):
     print(values)
     # 指定输入和输出数据
     X, y = values, values[:, 0]
-    print(X)
     print(y)
     return X, y
 
