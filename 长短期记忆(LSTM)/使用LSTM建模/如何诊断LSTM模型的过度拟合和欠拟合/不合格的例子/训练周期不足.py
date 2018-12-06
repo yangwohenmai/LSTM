@@ -23,14 +23,18 @@ def get_val():
 # define model
 model = Sequential()
 model.add(LSTM(10, input_shape=(1,1)))
+# activation是激活函数的选择，linear是线性函数
 model.add(Dense(1, activation='linear'))
-# compile model
+# compile model， loss是损失函数的取值方式，mse是mean_squared_error，代表均方误差，
+# optimizer是优化控制器的选择，AdamOptimizer通过使用动量（参数的移动平均数）来改善传统梯度下降
 model.compile(loss='mse', optimizer='adam')
 # fit model
 X,y = get_train()
 valX, valY = get_val()
+# validation_data是要验证的测试集，shuffle代表是否混淆打乱数据
 history = model.fit(X, y, epochs=100, validation_data=(valX, valY), shuffle=False)
 # plot train and validation loss
+# loss是训练集的损失函数值，val_loss是验证数据集的损失值
 pyplot.plot(history.history['loss'])
 pyplot.plot(history.history['val_loss'])
 pyplot.title('model train vs validation loss')
