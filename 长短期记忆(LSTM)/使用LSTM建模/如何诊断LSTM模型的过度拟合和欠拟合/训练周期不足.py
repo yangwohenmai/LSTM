@@ -32,6 +32,7 @@ model.compile(loss='mse', optimizer='adam')
 X,y = get_train()
 valX, valY = get_val()
 # validation_data是要验证的测试集，shuffle代表是否混淆打乱数据
+# 不合格的原因是epochs=100,训练周期不足
 history = model.fit(X, y, epochs=100, validation_data=(valX, valY), shuffle=False)
 # plot train and validation loss
 # loss是训练集的损失函数值，val_loss是验证数据集的损失值

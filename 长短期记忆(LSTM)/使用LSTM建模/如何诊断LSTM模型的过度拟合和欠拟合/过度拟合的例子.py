@@ -29,6 +29,7 @@ model.compile(loss='mse', optimizer='adam')
 # fit model
 X,y = get_train()
 valX, valY = get_val()
+# 出问题的原因是epochs=1200，训练次数过多，结果过拟合
 history = model.fit(X, y, epochs=1200, validation_data=(valX, valY), shuffle=False)
 # plot train and validation loss
 pyplot.plot(history.history['loss'][500:])

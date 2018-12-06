@@ -14,7 +14,7 @@ def get_train():
 
 # define model
 model = Sequential()
-model.add(LSTM(10, input_shape=(1,1)))
+model.add(LSTM(10, input_shape=(1, 1)))
 model.add(Dense(1, activation='linear'))
 # compile model
 model.compile(loss='mse', optimizer='adam')

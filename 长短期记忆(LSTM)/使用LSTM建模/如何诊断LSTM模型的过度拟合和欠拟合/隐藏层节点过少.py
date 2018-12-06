@@ -22,6 +22,7 @@ def get_val():
 
 # define model
 model = Sequential()
+# LSTM(1,...), LSTM层神经元节点设置过少
 model.add(LSTM(1, input_shape=(1,1)))
 model.add(Dense(1, activation='linear'))
 # compile model
