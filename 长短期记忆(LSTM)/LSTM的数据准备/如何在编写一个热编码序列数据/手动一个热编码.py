@@ -29,12 +29,12 @@ inverted = int_to_char[argmax(onehot_encoded[0])]
 def encode(pattern):
     encoded = list()
     for value in pattern:
-        row = [0.0 for x in range(len(pattern)-1)]
+        row = [0.0 for x in range(len(pattern))]
         row[value] = 1.0
         encoded.append(row)
     return encoded
 
-seq1 = [3, 0, 1, 2, 3]
+seq1 = [3, 0, 1, 2, 3, 5]
 encoded = encode(seq1)
 print(seq1)
 for vector in encoded:
