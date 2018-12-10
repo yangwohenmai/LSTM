@@ -40,7 +40,8 @@ def to_lstm_dataset(sequence, n_unique):
     """
     lstmX = dfX.values
     print(lstmX)
-    # lstmX.reshape(4, 1, 5),格式化成四个样本，每个样本一个步长，每个样本5个特征值
+    # lstmX.reshape(4, 1, 5),格式化成四个样本，每个样本一个步长，每个样本5个特征值。
+    # lstmX.shape[0]是行数，用来作为样本数量，lstmX.shape[1]是列数，用来作为特征值。
     """
     [[[0. 0. 0. 1. 0.]]
 
@@ -50,7 +51,7 @@ def to_lstm_dataset(sequence, n_unique):
 
      [[0. 0. 1. 0. 0.]]]
     """
-    lstmX = lstmX.reshape(lstmX.shape[0], 2, lstmX.shape[1])
+    lstmX = lstmX.reshape(lstmX.shape[0], 1, lstmX.shape[1])
     print(lstmX)
     lstmY = dfy.values
     """
