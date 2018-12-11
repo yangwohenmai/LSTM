@@ -3,7 +3,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 # prepare sequence
-# 输入为一个样本，五个步长，一个特征值
+# 输入为1个样本，5个步长，1个特征值
 length = 5
 seq = array([i/float(length) for i in range(length)])
 """
@@ -26,7 +26,7 @@ n_neurons = length
 n_batch = 1
 # create LSTM
 model = Sequential()
-# 输入类型为1个特征值和5个步长
+# 输入类型为5个步长，1个特征值
 model.add(LSTM(5, input_shape=(5, 1)))
 model.add(Dense(5))
 model.compile(loss='mean_squared_error', optimizer='adam')
