@@ -3,7 +3,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 
-# 数据转码成二进制方法
+# 数据转码成one-hot编码
 def encode(pattern, n_unique):
 	encoded = list()
 	for value in pattern:
@@ -12,7 +12,7 @@ def encode(pattern, n_unique):
 		encoded.append(row)
 	return encoded
 
-# create input/output pairs of encoded vectors, returns X, y
+# 创建一个输入输出数据映射
 def to_xy_pairs(encoded):
 	X,y = list(),list()
 	for i in range(1, len(encoded)):
@@ -20,7 +20,7 @@ def to_xy_pairs(encoded):
 		y.append(encoded[i])
 	return X, y
 
-# convert sequence to x/y pairs ready for use with an LSTM
+# 创建一个输入输出数据映射的序列
 def to_lstm_dataset(sequence, n_unique):
 	# one hot 编码
 	encoded = encode(sequence, n_unique)
@@ -36,8 +36,9 @@ def to_lstm_dataset(sequence, n_unique):
 # define sequences
 seq1 = [3, 0, 1, 2, 3]
 seq2 = [4, 0, 1, 2, 4]
-# 将序列转换为所需的数据格式
+# 获取序列的特征值数量
 n_unique = len(set(seq1 + seq2))
+# 创建一批用于训练的输入输出数据序列
 seq1X, seq1Y = to_lstm_dataset(seq1, n_unique)
 seq2X, seq2Y = to_lstm_dataset(seq2, n_unique)
 # 定义 LSTM 的配置
@@ -45,13 +46,17 @@ n_neurons = 20 #网络节点数量
 n_batch = 1 #样本
 n_epoch = 650 #训练周期
 n_features = n_unique #特征值
-# 创建 LSTM网络
+# 创建LSTM网络
 model = Sequential()
-model.add(LSTM(n_neurons, batch_input_shape=(n_batch, 1, n_features), stateful=True))
+# 网络中间层节点20个，每次输入样本1个，步长为1，特征值为5，stateful=True表明记录当前模型状态，作为为下一次训练网络时的前置状态
+model.add(LSTM(20, batch_input_shape=(n_batch, 1, n_features), stateful=True))
+# 激活函数为sigmoid函数，n_unique为输入数据维度/输入特征值数量
 model.add(Dense(n_unique, activation='sigmoid'))
+# loss为交叉熵损失函数，优化器是adam
 model.compile(loss='binary_crossentropy', optimizer='adam')
-# 训练 LSTM网络
-for i in range(n_epoch):
+# 训练LSTM网络，本文的网络训练方法是，每次网络训练一个周期并记住当前网络状态，并将当前网络状态作为下次网络训练的初始状态带入
+for i in range(650):
+    # 每次训练一个样本，一个训练周期，verbose=1表示打印网络执行状态，shuffle=False不打乱训练数据的顺序
 	model.fit(seq1X, seq1Y, epochs=1, batch_size=n_batch, verbose=1, shuffle=False)
 	model.reset_states()
 	model.fit(seq2X, seq2Y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
