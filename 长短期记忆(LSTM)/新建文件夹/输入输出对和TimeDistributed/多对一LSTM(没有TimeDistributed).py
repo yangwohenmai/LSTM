@@ -4,7 +4,6 @@ from keras.layers import Dense
 from keras.layers import LSTM
 # prepare sequence
 # 输入为一个样本，五个步长，一个特征值
-# 输出为五个特征值的一个样本
 length = 5
 seq = array([i/float(length) for i in range(length)])
 """
@@ -16,6 +15,7 @@ seq = array([i/float(length) for i in range(length)])
 """
 X = seq.reshape(1, 5, 1)
 print(X)
+# 输出为五个特征值的一个样本
 """
 [[0.  0.2 0.4 0.6 0.8]]
 """
