@@ -7,20 +7,32 @@ from keras.layers import LSTM
 # 输出为五个特征值的一个样本
 length = 5
 seq = array([i/float(length) for i in range(length)])
+"""
+[[[0. ]
+  [0.2]
+  [0.4]
+  [0.6]
+  [0.8]]]
+"""
 X = seq.reshape(1, 5, 1)
+print(X)
+"""
+[[0.  0.2 0.4 0.6 0.8]]
+"""
 y = seq.reshape(1, 5)
+print(y)
 # define LSTM configuration
 n_neurons = length
 n_batch = 1
-n_epoch = 500
 # create LSTM
 model = Sequential()
-model.add(LSTM(n_neurons, input_shape=(5, 1)))
+# 输入类型为1个特征值和5个步长
+model.add(LSTM(5, input_shape=(5, 1)))
 model.add(Dense(5))
 model.compile(loss='mean_squared_error', optimizer='adam')
 print(model.summary())
 # train LSTM
-model.fit(X, y, epochs=n_epoch, batch_size=n_batch, verbose=2)
+model.fit(X, y, epochs=500, batch_size=n_batch, verbose=2)
 # evaluate
 result = model.predict(X, batch_size=n_batch, verbose=0)
 for value in result[0,:]:
