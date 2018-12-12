@@ -1,12 +1,13 @@
 from random import randint
+from numpy import array
+from numpy import argmax
 from pandas import DataFrame
 from pandas import concat
 from keras.models import Sequential
 from keras.layers import LSTM
 from keras.layers import Dense
 from keras.layers import TimeDistributed
-from numpy import *
-set_printoptions(threshold=NaN)
+from keras.layers import RepeatVector
 
 # generate a sequence of random numbers in [0, 99]
 def generate_sequence(length=25):
@@ -23,7 +24,7 @@ def one_hot_encode(sequence, n_unique=100):
 
 # decode a one hot encoded string
 def one_hot_decode(encoded_seq):
-        return [argmax(vector) for vector in encoded_seq]
+    return [argmax(vector) for vector in encoded_seq]
 
 # convert encoded sequence to supervised learning
 def to_supervised(sequence, n_in, n_out):
@@ -37,8 +38,6 @@ def to_supervised(sequence, n_in, n_out):
     width = sequence.shape[1]
     X = values.reshape(len(values), n_in, width)
     y = values[:, 0:(n_out*width)].reshape(len(values), n_out, width)
-    #print(X)
-    #print(y)
     return X, y
 
 # prepare data for the LSTM
@@ -53,15 +52,17 @@ def get_data(n_in, n_out):
 
 # define LSTM
 n_in = 5
-n_out = 5
+n_out = 2
 encoded_length = 100
-batch_size = 7
+batch_size = 21
 model = Sequential()
-model.add(LSTM(20, batch_input_shape=(batch_size, n_in, encoded_length), return_sequences=True, stateful=True))
+model.add(LSTM(150, batch_input_shape=(batch_size, n_in, encoded_length), stateful=True))
+model.add(RepeatVector(n_out))
+model.add(LSTM(150, return_sequences=True, stateful=True))
 model.add(TimeDistributed(Dense(encoded_length, activation='softmax')))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
 # train LSTM
-for epoch in range(500):
+for epoch in range(5000):
     # generate new random sequence
     X,y = get_data(n_in, n_out)
     # fit model for one epoch on this sequence
