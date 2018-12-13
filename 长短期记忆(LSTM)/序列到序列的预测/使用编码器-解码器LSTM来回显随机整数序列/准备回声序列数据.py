@@ -21,7 +21,7 @@ def one_hot_encode(sequence, n_unique=100):
 def one_hot_decode(encoded_seq):
 	return [argmax(vector) for vector in encoded_seq]
 
-# convert encoded sequence to supervised learning
+# 将编码序列转换为监督学习
 def to_supervised(sequence, n_in, n_out):
 	# 创建序列的滞后副本
 	df = DataFrame(sequence)

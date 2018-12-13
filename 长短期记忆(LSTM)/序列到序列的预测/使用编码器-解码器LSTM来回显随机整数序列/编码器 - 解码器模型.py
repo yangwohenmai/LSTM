@@ -13,7 +13,7 @@ from keras.layers import RepeatVector
 def generate_sequence(length=25):
     return [randint(0, 99) for _ in range(length)]
 
-# one hot encode sequence
+# 生成一个one hot encode 序列
 def one_hot_encode(sequence, n_unique=100):
     encoding = list()
     for value in sequence:
@@ -22,27 +22,29 @@ def one_hot_encode(sequence, n_unique=100):
         encoding.append(vector)
     return array(encoding)
 
-# decode a one hot encoded string
+# 解码one hot encoded 的字符串
 def one_hot_decode(encoded_seq):
-    return [argmax(vector) for vector in encoded_seq]
+        return [argmax(vector) for vector in encoded_seq]
 
-# convert encoded sequence to supervised learning
+# 将编码序列转换为监督学习
 def to_supervised(sequence, n_in, n_out):
-    # create lag copies of the sequence
+    # 创建序列的滞后副本
     df = DataFrame(sequence)
     df = concat([df.shift(n_in-i-1) for i in range(n_in)], axis=1)
-    # drop rows with missing values
+    # 删除缺失数据的行
     df.dropna(inplace=True)
-    # specify columns for input and output pairs
+    # 指定输入和输出对的列
     values = df.values
     width = sequence.shape[1]
     X = values.reshape(len(values), n_in, width)
     y = values[:, 0:(n_out*width)].reshape(len(values), n_out, width)
+    #print(X)
+    #print(y)
     return X, y
 
-# prepare data for the LSTM
+# 为LSTM准备数据
 def get_data(n_in, n_out):
-    # generate random sequence
+    # 生成随机序列
     sequence = generate_sequence()
     # one hot encode
     encoded = one_hot_encode(sequence)
@@ -56,21 +58,22 @@ n_out = 2
 encoded_length = 100
 batch_size = 21
 model = Sequential()
+#构建一个有状态的网络
 model.add(LSTM(150, batch_input_shape=(batch_size, n_in, encoded_length), stateful=True))
 model.add(RepeatVector(n_out))
 model.add(LSTM(150, return_sequences=True, stateful=True))
 model.add(TimeDistributed(Dense(encoded_length, activation='softmax')))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
-# train LSTM
+# 训练网络 LSTM
 for epoch in range(5000):
     # generate new random sequence
     X,y = get_data(n_in, n_out)
-    # fit model for one epoch on this sequence
+    # 每次对网络训练一个周期时长
     model.fit(X, y, epochs=1, batch_size=batch_size, verbose=2, shuffle=False)
     model.reset_states()
-# evaluate LSTM
+# 评估 LSTM
 X,y = get_data(n_in, n_out)
 yhat = model.predict(X, batch_size=batch_size, verbose=0)
-# decode all pairs
+# 解码映射
 for i in range(len(X)):
     print('Expected:', one_hot_decode(y[i]), 'Predicted', one_hot_decode(yhat[i]))
