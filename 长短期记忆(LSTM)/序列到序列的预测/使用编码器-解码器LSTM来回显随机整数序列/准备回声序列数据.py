@@ -4,11 +4,11 @@ from pandas import concat
 from numpy import *
 set_printoptions(threshold=NaN)
 
-# generate a sequence of random numbers in [0, 99]
+# generate a sequence of random numbers in [0, 49]
 def generate_sequence(length=25):
-	return [randint(0, 99) for _ in range(length)]
+	return [randint(0, 49) for _ in range(length)]
 
-# one hot encode sequence
+# 生成一个one hot encode 序列
 def one_hot_encode(sequence, n_unique=100):
 	encoding = list()
 	for value in sequence:
@@ -17,32 +17,32 @@ def one_hot_encode(sequence, n_unique=100):
 		encoding.append(vector)
 	return array(encoding)
 
-# decode a one hot encoded string
+# 解码one hot encoded 的字符串
 def one_hot_decode(encoded_seq):
 	return [argmax(vector) for vector in encoded_seq]
 
 # convert encoded sequence to supervised learning
 def to_supervised(sequence, n_in, n_out):
-	# create lag copies of the sequence
+	# 创建序列的滞后副本
 	df = DataFrame(sequence)
 	df = concat([df.shift(n_in-i-1) for i in range(n_in)], axis=1)
-	# drop rows with missing values
+	# 删除缺失数据的行
 	df.dropna(inplace=True)
-	# specify columns for input and output pairs
+	# 指定输入和输出对的列
 	values = df.values
 	width = sequence.shape[1]
 	X = values.reshape(len(values), n_in, width)
 	y = values[:, 0:(n_out*width)].reshape(len(values), n_out, width)
 	return X, y
 
-# generate random sequence
+# 生成随机序列
 sequence = generate_sequence()
 print(sequence)
-# one hot encode
+# 转码成one hot encode
 encoded = one_hot_encode(sequence)
 print(encoded)
-# convert to X,y pairs
+# 构造一个X y 键值对
 X,y = to_supervised(encoded, 5, 3)
-# decode all pairs
+# 构造键值对
 for i in range(len(X)):
 	print(one_hot_decode(X[i]), '=>', one_hot_decode(y[i]))
