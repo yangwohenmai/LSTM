@@ -56,7 +56,7 @@ model.add(Dense(n_unique, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam')
 # 训练LSTM网络，本文的网络训练方法是，每次网络训练一个周期并记住当前网络状态，并将当前网络状态作为下次网络训练的初始状态带入
 for i in range(650):
-    # 每次训练一个样本，一个训练周期，verbose=1表示打印网络执行状态，shuffle=False不打乱训练数据的顺序
+	# 每次训练一个样本，一个训练周期，verbose=1表示打印网络执行状态，shuffle=False不打乱训练数据的顺序
 	model.fit(seq1X, seq1Y, epochs=1, batch_size=n_batch, verbose=1, shuffle=False)
 	model.reset_states()
 	model.fit(seq2X, seq2Y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
