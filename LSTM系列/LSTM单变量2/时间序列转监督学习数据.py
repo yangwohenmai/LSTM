@@ -22,7 +22,8 @@ series = read_csv("data_set\shampoo-sales.csv", header=0, parse_dates=[0], index
 '''
 
 
-#这个函数说了一大堆，简单说就是把data数组重新构造成两两一组的二维数组，每个数据对格式是[0,n],[n,n+1],[n+1,n+2],第一组数据用0补全，即为[0,n]，这就是所谓的监督学习数据
+# 这个函数说了一大堆，简单说就是把data数组重新构造成两两一组的二维数组，每个数据对格式是[0,n],[n,n+1],[n+1,n+2],
+# 第一组数据用0补全，即为[0,n]，这就是所谓的监督学习数据
 def timeseries_to_supervised(data, lag=1):  # lag表示的是当前的值只与历史lag个时间步长的值有关，也就是用lag个数据预测下一个
     df = DataFrame(data)
     colums = [df.shift(i) for i in range(1, lag + 1)]  # 原始数据时间窗向后移动lag步长
