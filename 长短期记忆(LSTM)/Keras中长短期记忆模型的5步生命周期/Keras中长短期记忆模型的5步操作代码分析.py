@@ -97,7 +97,7 @@ model = Sequential()
 model.add(LSTM(10, input_shape=(1,1)))
 # 通常跟随LSTM层并用于输出预测的完全连接层称为Dense（）。
 model.add(Dense(1))
-# 2. 编译网络，设置损失参数
+# 2. 编译网络，设置损失参数,优化器是Adam，损失函数是均方差
 model.compile(optimizer='adam', loss='mean_squared_error')
 # 3. 调用网络开始训练模型
 history = model.fit(X, y, epochs=1000, batch_size=len(X), verbose=0)

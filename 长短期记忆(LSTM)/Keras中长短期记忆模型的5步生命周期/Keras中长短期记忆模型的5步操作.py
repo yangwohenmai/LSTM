@@ -7,14 +7,17 @@ from keras.layers import LSTM
 length = 10
 sequence = [i/float(length) for i in range(length)]
 print(sequence)
-# 构建一个X->y的映射关系
+# 以下部分开始构建一个X->y的映射关系
+#将序列转换为竖直排列的格式
 df = DataFrame(sequence)
 print(df)
+# 创建一个监督序列数据，shift(1)将第一列向下移一位
 df = concat([df.shift(1), df], axis=1)
 print(df)
+# 删除有na值的行
 df.dropna(inplace=True)
 print(df)
-# 使用reshape方法，把序列转换为LSTM可识别的数组格式
+# 使用reshape方法，把监督型序列转换为LSTM可识别的数组格式
 values = df.values
 print(values)
 X, y = values[:, 0], values[:, 1]
@@ -39,7 +42,7 @@ predictions = model.predict(X, verbose=0)
 print(predictions[:, 0])
 
 
-
+# 构建一个新序列，对预测模型进行二次预测
 # 创建一个0.1~0.9的序列
 length = 10
 sequence = [(i+5)/float(length) for i in range(length)]
@@ -48,9 +51,13 @@ print(sequence)
 df = DataFrame(sequence)
 df = concat([df.shift(1), df], axis=1)
 df.dropna(inplace=True)
+print(df)
 # 使用reshape方法，把序列转换为LSTM可识别的数组格式
 values = df.values
 X, y = values[:, 0], values[:, 1]
 X = X.reshape(len(X), 1, 1)
 predictions = model.predict(X, verbose=0)
 print(predictions[:, 0])
+#原始序列[0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
+#预测数列[0.5880783  0.68985283 0.794536   0.9015892  1.0105045  1.1208173 1.2321128  1.3440294  1.4562595 ]
+#正确序列[0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4]
