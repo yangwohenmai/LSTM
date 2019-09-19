@@ -3,6 +3,9 @@ from pandas import concat
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
+"""
+https://machinelearningmastery.com/5-step-life-cycle-long-short-term-memory-models-keras/
+"""
 # 创建一个0.1~0.9的序列[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 length = 10
 sequence = [i/float(length) for i in range(length)]
