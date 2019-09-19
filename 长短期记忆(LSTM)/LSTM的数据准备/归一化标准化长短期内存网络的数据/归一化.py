@@ -8,6 +8,7 @@ print(series)
 values = series.values
 values = values.reshape((len(values), 1))
 # 配置数据归一化方法MinMaxScaler
+# y = (x - min) / (max - min)
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaler = scaler.fit(values)
 print('Min: %f, Max: %f' % (scaler.data_min_, scaler.data_max_))

@@ -1,0 +1,1 @@
+https://machinelearningmastery.com/reshape-input-data-long-short-term-memory-networks-keras/

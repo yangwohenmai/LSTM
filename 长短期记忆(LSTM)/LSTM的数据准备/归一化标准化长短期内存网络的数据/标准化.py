@@ -9,12 +9,19 @@ print(series)
 values = series.values
 values = values.reshape((len(values), 1))
 # 配置标准化方法StandardScaler
+# y = (x - mean) / standard_deviation
 scaler = StandardScaler()
 scaler = scaler.fit(values)
 print('Mean: %f, StandardDeviation: %f' % (scaler.mean_, sqrt(scaler.var_)))
 # 输出标准化后的数据
 standardized = scaler.transform(values)
+
+# 标准化后的数据均值为0，方差为1
+scaler = scaler.fit(standardized)
+print('Mean: %f, StandardDeviation: %f' % (scaler.mean_, sqrt(scaler.var_)))
+
 print(standardized)
 # 标准化数据的逆转换
 inversed = scaler.inverse_transform(standardized)
 print(inversed)
+

@@ -1,0 +1,1 @@
+https://machinelearningmastery.com/how-to-scale-data-for-long-short-term-memory-networks-in-python/
