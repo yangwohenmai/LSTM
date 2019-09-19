@@ -11,7 +11,8 @@ print(sequence)
 #将序列转换为竖直排列的格式
 df = DataFrame(sequence)
 print(df)
-# 创建一个监督序列数据，shift(1)将第一列向下移一位
+# 创建一个监督序列数据，axis=1表示对列操作(拼接成多列)，axis=0表示对行操作(拼接成一列多行)
+# concat将多个df序列合并成一个集合，shift(1)将当前列向下移动，shift(-1)向上移动
 df = concat([df.shift(1), df], axis=1)
 print(df)
 # 删除有na值的行
@@ -32,7 +33,7 @@ model.add(LSTM(10, input_shape=(1,1)))
 model.add(Dense(1))
 # 2. 编译网络，设置损失参数
 model.compile(optimizer='adam', loss='mean_squared_error')
-# 3. 调用网络开始训练模型
+# 3. 调用网络开始训练模型，对数据训练1000次
 history = model.fit(X, y, epochs=1000, batch_size=len(X), verbose=0)
 # 4. 评估网络
 loss = model.evaluate(X, y, verbose=0)
