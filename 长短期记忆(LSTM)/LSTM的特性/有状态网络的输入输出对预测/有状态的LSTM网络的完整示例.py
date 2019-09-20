@@ -58,6 +58,7 @@ model.compile(loss='binary_crossentropy', optimizer='adam')
 for i in range(650):
 	# 每次训练一个样本，一个训练周期，verbose=1表示打印网络执行状态，shuffle=False不打乱训练数据的顺序
 	model.fit(seq1X, seq1Y, epochs=1, batch_size=n_batch, verbose=1, shuffle=False)
+	# 我们对这批数据训练650次，可以理解为有650条数据，而这650条数据都是独立的，之间并没有顺序关联，所以每次都重置网络状态
 	model.reset_states()
 	model.fit(seq2X, seq2Y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
 	model.reset_states()
