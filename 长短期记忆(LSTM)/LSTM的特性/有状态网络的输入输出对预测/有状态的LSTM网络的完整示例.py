@@ -59,6 +59,7 @@ for i in range(650):
 	# 每次训练一个样本，一个训练周期，verbose=1表示打印网络执行状态，shuffle=False不打乱训练数据的顺序
 	model.fit(seq1X, seq1Y, epochs=1, batch_size=n_batch, verbose=1, shuffle=False)
 	# 我们对这批数据训练650次，可以理解为有650条数据，而这650条数据都是独立的，之间并没有顺序关联，所以每次都重置网络状态
+    # 如果是将一个完整的长序列拆分成650份短序列，则这650条数据之间是有关联的，每次循环可不重置网络状态，使状态在每次训练中传递下去
 	model.reset_states()
 	model.fit(seq2X, seq2Y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
 	model.reset_states()

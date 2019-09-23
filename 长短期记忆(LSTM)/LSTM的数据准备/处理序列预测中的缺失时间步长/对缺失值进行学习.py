@@ -5,7 +5,9 @@ from pandas import DataFrame
 from keras.models import Sequential
 from keras.layers import LSTM
 from keras.layers import Dense
-
+"""
+对缺失值进行学习，效果比忽略缺失值更好
+"""
 # 生成一系列随机值
 def generate_sequence(n_timesteps):
 	return [random() for _ in range(n_timesteps)]
