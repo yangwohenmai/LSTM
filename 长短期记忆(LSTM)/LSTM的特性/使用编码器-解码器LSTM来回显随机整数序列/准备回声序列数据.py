@@ -1,12 +1,12 @@
 from random import randint
+from numpy import array
+from numpy import argmax
 from pandas import DataFrame
 from pandas import concat
-from numpy import *
-set_printoptions(threshold=NaN)
 
 # generate a sequence of random numbers in [0, 49]
 def generate_sequence(length=25):
-	return [randint(0, 49) for _ in range(length)]
+	return [randint(0, 99) for _ in range(length)]
 
 # 生成一个one hot encode 序列
 def one_hot_encode(sequence, n_unique=100):
