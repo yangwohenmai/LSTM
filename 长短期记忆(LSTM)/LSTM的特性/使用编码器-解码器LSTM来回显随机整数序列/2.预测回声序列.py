@@ -29,6 +29,8 @@ def one_hot_decode(encoded_seq):
 def to_supervised(sequence, n_in, n_out):
     # 创建序列的滞后副本
     df = DataFrame(sequence)
+    # 每个df是一个25*100的矩阵，此时横向将5个25*100的矩阵拼接起来，成为25*500的矩阵
+    # 这5个矩阵块，依次向下位移4,3,2,1,0个竖直单位
     df = concat([df.shift(n_in-i-1) for i in range(n_in)], axis=1)
     # 删除缺失数据的行
     df.dropna(inplace=True)
