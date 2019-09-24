@@ -1,12 +1,12 @@
 from random import randint
+from numpy import array
+from numpy import argmax
 from pandas import DataFrame
 from pandas import concat
 from keras.models import Sequential
 from keras.layers import LSTM
 from keras.layers import Dense
 from keras.layers import TimeDistributed
-from numpy import *
-set_printoptions(threshold=NaN)
 
 # generate a sequence of random numbers in [0, 99]
 def generate_sequence(length=25):
