@@ -22,8 +22,6 @@ print(X)
 y = seq.reshape(1, 5)
 print(y)
 # define LSTM configuration
-n_neurons = length
-n_batch = 1
 # create LSTM
 model = Sequential()
 # 输入类型为5个步长，1个特征值
@@ -32,8 +30,8 @@ model.add(Dense(5))
 model.compile(loss='mean_squared_error', optimizer='adam')
 print(model.summary())
 # train LSTM
-model.fit(X, y, epochs=500, batch_size=n_batch, verbose=2)
+model.fit(X, y, epochs=500, batch_size=1, verbose=2)
 # evaluate
-result = model.predict(X, batch_size=n_batch, verbose=0)
+result = model.predict(X, batch_size=1, verbose=0)
 for value in result[0,:]:
 	print('%.1f' % value)

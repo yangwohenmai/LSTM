@@ -11,7 +11,6 @@ X = seq.reshape(1, 5, 1)
 # 输出为1个样本，5个步长，1个特征值
 y = seq.reshape(1, 5, 1)
 # define LSTM configuration
-n_batch = 1
 # create LSTM
 model = Sequential()
 # 输入类型为5个步长和1个特征值，return_sequences=True返回整个序列
@@ -20,8 +19,8 @@ model.add(TimeDistributed(Dense(1)))
 model.compile(loss='mean_squared_error', optimizer='adam')
 print(model.summary())
 # train LSTM
-model.fit(X, y, epochs=1000, batch_size=n_batch, verbose=2)
+model.fit(X, y, epochs=1000, batch_size=1, verbose=2)
 # evaluate
-result = model.predict(X, batch_size=n_batch, verbose=0)
+result = model.predict(X, batch_size=1, verbose=0)
 for value in result[0,:,0]:
 	print('%.1f' % value)
