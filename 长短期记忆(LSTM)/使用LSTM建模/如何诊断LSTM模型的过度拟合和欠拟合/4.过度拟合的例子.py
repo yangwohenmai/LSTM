@@ -3,7 +3,11 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from matplotlib import pyplot
 from numpy import array
-
+"""
+在损失图上，从第600周期开始，出现过拟合
+在history.history['loss']上使用[500:]表示从500周期后开始画图，可以明显看到过拟合的现象
+不加[500:]的话看的不明显
+"""
 # return training data
 def get_train():
 	seq = [[0.0, 0.1], [0.1, 0.2], [0.2, 0.3], [0.3, 0.4], [0.4, 0.5]]
@@ -20,7 +24,7 @@ def get_val():
 	X = X.reshape((len(X), 1, 1))
 	return X, y
 
-# define model
+# define model从
 model = Sequential()
 model.add(LSTM(10, input_shape=(1,1)))
 model.add(Dense(1, activation='linear'))
