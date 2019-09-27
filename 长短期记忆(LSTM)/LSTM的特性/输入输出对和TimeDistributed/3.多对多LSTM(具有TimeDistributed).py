@@ -3,6 +3,11 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import TimeDistributed
 from keras.layers import LSTM
+"""
+TimeDistributed这个封装器将一个层应用于输入的每个时间片,输入至少为 3D，且第一个维度应该是时间所表示的维度。
+如：input_shape=(32,10,16)考虑32个样本的一个batch，其中每个样本是10个16 维向量的序列
+使用 TimeDistributed 来将 Dense 层独立地应用到 这 10 个时间步的每一个
+"""
 # prepare sequence
 length = 5
 seq = array([i/float(length) for i in range(length)])
