@@ -14,4 +14,5 @@ model.compile(optimizer='adam', loss='mse')
 data = array([0.1, 0.2, 0.3]).reshape((1,3,1))
 # make and show prediction
 print(model.predict(data))
-
+print(data.shape)
+print(model.predict(data).shape)
