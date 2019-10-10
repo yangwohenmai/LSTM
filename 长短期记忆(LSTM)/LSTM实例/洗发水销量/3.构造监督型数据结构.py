@@ -7,7 +7,9 @@ from pandas import concat
 def timeseries_to_supervised(data, lag=1):
     df = DataFrame(data)
     print(df)
-    # 该行生成一个数组，将df向下移动一位作为第一个元素
+    # 该行代码生成一个数组，将df向下移动一位作为第一个元素
+    # 用这种特殊的代码写法是为了生成一个数组列表的数据结构，而不是一个序列
+    # columns = df.shift(1)生成的是一个序列，而不是列表
     columns = [df.shift(i) for i in range(1, lag+1)]
     print(columns)
     print(df)
@@ -21,9 +23,11 @@ def timeseries_to_supervised(data, lag=1):
     return df
 
 
-# load dataset
+# 数据格式处理
 def parser(x):
     return datetime.strptime('190'+x, '%Y-%m')
+
+
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 # transform to supervised learning
 X = series.values
