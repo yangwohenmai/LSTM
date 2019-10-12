@@ -65,7 +65,7 @@ def invert_scale(scaler, X, value):
 def fit_lstm(train, batch_size, nb_epoch, neurons):
     # 将数据对中的X, y拆分开
 	X, y = train[:, 0:-1], train[:, -1]
-	#X = X.reshape(X.shape[0], 1, X.shape[1])
+	X = X.reshape(X.shape[0], 1, X.shape[1])
 	model = Sequential()
     # neurons是神经元个数，batch_size是样本个数，batch_input_shape是输入形状，stateful是状态保留
 	model.add(LSTM(neurons, batch_input_shape=(batch_size, X.shape[1], X.shape[2]), stateful=True))
