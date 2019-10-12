@@ -1,12 +1,12 @@
-from pandas import read_csv
+ï»¿from pandas import read_csv
 from pandas import datetime
 from pandas import Series
 from sklearn.preprocessing import MinMaxScaler
 """
-Í¨¹ıÅäÖÃMinMaxScalerµÄfeature_range²ÎÊı£¬¿ÉÒÔ½«Êı¾İËõ·ÅÔÚÈÎÒâ·¶Î§ÄÚ
+é€šè¿‡é…ç½®MinMaxScalerçš„feature_rangeå‚æ•°ï¼Œå¯ä»¥å°†æ•°æ®ç¼©æ”¾åœ¨ä»»æ„èŒƒå›´å†…
 """
 
-# Êı¾İ¸ñÊ½´¦Àí
+# æ•°æ®æ ¼å¼å¤„ç†
 def parser(x):
 	return datetime.strptime('190'+x, '%Y-%m')
 
@@ -16,18 +16,18 @@ print(series)
 # transform scale
 X = series.values
 X = X.reshape(len(X), 1)
-# feature_range¶¨ÒåÊı¾İËõ·Å·¶Î§
+# feature_rangeå®šä¹‰æ•°æ®ç¼©æ”¾èŒƒå›´
 scaler = MinMaxScaler(feature_range=(-1, 1))
-# ¶ÔÊı¾İ½øĞĞÊÊÅä£¬ÕÒµ½×î´ó×îĞ¡ÖµµÈÌØÕ÷£¬±ãÓÚºóĞø×ª»»
+# å¯¹æ•°æ®è¿›è¡Œé€‚é…ï¼Œæ‰¾åˆ°æœ€å¤§æœ€å°å€¼ç­‰ç‰¹å¾ï¼Œä¾¿äºåç»­è½¬æ¢
 scaler = scaler.fit(X)
-# ¿ªÊ¼×ª»»Êı¾İ,Êä³öÒ»¸ö¶şÎ¬Êı×é
+# å¼€å§‹è½¬æ¢æ•°æ®,è¾“å‡ºä¸€ä¸ªäºŒç»´æ•°ç»„
 scaled_X = scaler.transform(X)
 print(scaled_X)
-# ½«¶şÎ¬Êı×é×ª»»³ÉĞòÁĞ
+# å°†äºŒç»´æ•°ç»„è½¬æ¢æˆåºåˆ—
 scaled_series = Series(scaled_X[:, 0])
 print(scaled_series)
 
-# ½«Ëõ·ÅºóµÄÊı¾İ·´Ïò×ª»»³ÉÔ­Öµ
+# å°†ç¼©æ”¾åçš„æ•°æ®åå‘è½¬æ¢æˆåŸå€¼
 inverted_X = scaler.inverse_transform(scaled_X)
 inverted_series = Series(inverted_X[:, 0])
 print(inverted_series)

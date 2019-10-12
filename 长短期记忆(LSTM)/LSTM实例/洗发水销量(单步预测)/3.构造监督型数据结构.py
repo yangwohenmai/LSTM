@@ -1,29 +1,29 @@
-from pandas import read_csv
+ï»¿from pandas import read_csv
 from pandas import datetime
 from pandas import DataFrame
 from pandas import concat
 
-# ¹¹Ôì¼à¶½Ñ§Ï°Êı¾İ½á¹¹
+# æ„é€ ç›‘ç£å­¦ä¹ æ•°æ®ç»“æ„
 def timeseries_to_supervised(data, lag=1):
     df = DataFrame(data)
     print(df)
-    # ¸ÃĞĞ´úÂëÉú³ÉÒ»¸öÊı×é£¬½«dfÏòÏÂÒÆ¶¯Ò»Î»×÷ÎªµÚÒ»¸öÔªËØ
-    # ÓÃÕâÖÖÌØÊâµÄ´úÂëĞ´·¨ÊÇÎªÁËÉú³ÉÒ»¸öÊı×éÁĞ±íµÄÊı¾İ½á¹¹£¬¶ø²»ÊÇÒ»¸öĞòÁĞ
-    # columns = df.shift(1)Éú³ÉµÄÊÇÒ»¸öĞòÁĞ£¬¶ø²»ÊÇÁĞ±í
+    # è¯¥è¡Œä»£ç ç”Ÿæˆä¸€ä¸ªæ•°ç»„ï¼Œå°†dfå‘ä¸‹ç§»åŠ¨ä¸€ä½ä½œä¸ºç¬¬ä¸€ä¸ªå…ƒç´ 
+    # ç”¨è¿™ç§ç‰¹æ®Šçš„ä»£ç å†™æ³•æ˜¯ä¸ºäº†ç”Ÿæˆä¸€ä¸ªæ•°ç»„åˆ—è¡¨çš„æ•°æ®ç»“æ„ï¼Œè€Œä¸æ˜¯ä¸€ä¸ªåºåˆ—
+    # columns = df.shift(1)ç”Ÿæˆçš„æ˜¯ä¸€ä¸ªåºåˆ—ï¼Œè€Œä¸æ˜¯åˆ—è¡¨
     columns = [df.shift(i) for i in range(1, lag+1)]
     print(columns)
     print(df)
-    # df×÷ÎªµÚ¶ş¸öÔªËØ
+    # dfä½œä¸ºç¬¬äºŒä¸ªå…ƒç´ 
     columns.append(df)
-    # ½«df.shift(1)£¬df°´ÁĞºÏ²¢£¬¹¹³É¼à¶½ĞÍÊı¾İ
+    # å°†df.shift(1)ï¼ŒdfæŒ‰åˆ—åˆå¹¶ï¼Œæ„æˆç›‘ç£å‹æ•°æ®
     df = concat(columns, axis=1)
     print(df)
-    # ½«NaNÎ»ÖÃ²¹Áã
+    # å°†NaNä½ç½®è¡¥é›¶
     df.fillna(0, inplace=True)
     return df
 
 
-# Êı¾İ¸ñÊ½´¦Àí
+# æ•°æ®æ ¼å¼å¤„ç†
 def parser(x):
     return datetime.strptime('190'+x, '%Y-%m')
 

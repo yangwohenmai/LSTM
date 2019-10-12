@@ -1,12 +1,12 @@
-from pandas import read_csv
+ï»¿from pandas import read_csv
 from pandas import datetime
 from pandas import Series
 
 """
-²î·ÖĞòÁĞ¾ÍÊÇÓÃÒ»¸öĞòÁĞÖĞ£¬ÏàÁÚÁ½Êı½øĞĞÏà¼õ
-Ö»¿¼ÂÇĞòÁĞÖĞµÄ±ä»¯ÂÊ£¬ÅÅ³ıĞòÁĞÖĞËù¾ßÓĞµÄÇ÷ÊÆÎÊÌâ
+å·®åˆ†åºåˆ—å°±æ˜¯ç”¨ä¸€ä¸ªåºåˆ—ä¸­ï¼Œç›¸é‚»ä¸¤æ•°è¿›è¡Œç›¸å‡
+åªè€ƒè™‘åºåˆ—ä¸­çš„å˜åŒ–ç‡ï¼Œæ’é™¤åºåˆ—ä¸­æ‰€å…·æœ‰çš„è¶‹åŠ¿é—®é¢˜
 """
-# ´´½¨Ò»¸ö²î·ÖĞòÁĞ
+# åˆ›å»ºä¸€ä¸ªå·®åˆ†åºåˆ—
 def difference(dataset, interval=1):
 	diff = list()
 	for i in range(interval, len(dataset)):
@@ -14,17 +14,17 @@ def difference(dataset, interval=1):
 		diff.append(value)
 	return Series(diff)
 
-# »¹Ô­²î·ÖĞòÁĞ
+# è¿˜åŸå·®åˆ†åºåˆ—
 def inverse_difference(history, yhat, interval=1):
 	return yhat + history[-interval]
 
-# Êı¾İ¸ñÊ½´¦Àí
+# æ•°æ®æ ¼å¼å¤„ç†
 def parser(x):
 	return datetime.strptime('190'+x, '%Y-%m')
 
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 print(series)
-# ²î·Öº¯Êı£¬²î·Ö²½³¤Îª1
+# å·®åˆ†å‡½æ•°ï¼Œå·®åˆ†æ­¥é•¿ä¸º1
 differenced = difference(series, 1)
 print(differenced)
 # invert transform

@@ -1,18 +1,18 @@
-from pandas import read_csv
+ï»¿from pandas import read_csv
 from pandas import datetime
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 from matplotlib import pyplot
 """
-±¾´úÂëÃ»ÓĞÔ¤²â¹¦ÄÜ£¬Ô¤²âÊı¾İÖ»ÊÇÕÕ°áÁËt-1µÄÊı¾İ×÷ÎªÔ¤²âÖµ
-±¾ÎÄÖ÷ÒªÕ¹Ê¾ÁËÊı¾İ×÷Í¼µÄ·½·¨
+æœ¬ä»£ç æ²¡æœ‰é¢„æµ‹åŠŸèƒ½ï¼Œé¢„æµ‹æ•°æ®åªæ˜¯ç…§æ¬äº†t-1çš„æ•°æ®ä½œä¸ºé¢„æµ‹å€¼
+æœ¬æ–‡ä¸»è¦å±•ç¤ºäº†æ•°æ®ä½œå›¾çš„æ–¹æ³•
 """
-# ĞŞ¸ÄÊı¾İ¸ñÊ½
+# ä¿®æ”¹æ•°æ®æ ¼å¼
 def parser(x):
 	return datetime.strptime('190'+x, '%Y-%m')
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
-# ²ğ·ÖÑµÁ·¼¯ºÍ²âÊÔ¼¯
-# ÑµÁ·Êı¾İ´Ó0µ½µ¹ÊıµÚ12Ìõ£¬²âÊÔÊı¾İ´Óµ¹ÊıµÚ12Ìõµ½×îºóÒ»Ìõ
+# æ‹†åˆ†è®­ç»ƒé›†å’Œæµ‹è¯•é›†
+# è®­ç»ƒæ•°æ®ä»0åˆ°å€’æ•°ç¬¬12æ¡ï¼Œæµ‹è¯•æ•°æ®ä»å€’æ•°ç¬¬12æ¡åˆ°æœ€åä¸€æ¡
 X = series.values
 train, test = X[0:-12], X[-12:]
 # walk-forward validation

@@ -1,4 +1,4 @@
-from pandas import DataFrame
+ï»¿from pandas import DataFrame
 from pandas import Series
 from pandas import concat
 from pandas import read_csv
@@ -12,11 +12,11 @@ from math import sqrt
 from matplotlib import pyplot
 import numpy
 
-# Êı¾İ½á¹¹´¦Àí
+# æ•°æ®ç»“æ„å¤„ç†
 def parser(x):
 	return datetime.strptime('190'+x, '%Y-%m')
 
-# ½«Êı¾İ×ª»»Îª¼à¶½ĞÍÑ§Ï°Êı¾İ£¬NaNÖµ²¹0
+# å°†æ•°æ®è½¬æ¢ä¸ºç›‘ç£å‹å­¦ä¹ æ•°æ®ï¼ŒNaNå€¼è¡¥0
 def timeseries_to_supervised(data, lag=1):
 	df = DataFrame(data)
 	columns = [df.shift(i) for i in range(1, lag+1)]
@@ -25,7 +25,7 @@ def timeseries_to_supervised(data, lag=1):
 	df.fillna(0, inplace=True)
 	return df
 
-# ¹¹½¨²î·ÖĞòÁĞ
+# æ„å»ºå·®åˆ†åºåˆ—
 def difference(dataset, interval=1):
 	diff = list()
 	for i in range(interval, len(dataset)):
@@ -33,19 +33,19 @@ def difference(dataset, interval=1):
 		diff.append(value)
 	return Series(diff)
 
-# ²î·ÖÄæ×ª»»
+# å·®åˆ†é€†è½¬æ¢
 def inverse_difference(history, yhat, interval=1):
 	return yhat + history[-interval]
 
-# ½«Êı¾İËõ·Åµ½ [-1, 1]Ö®¼äµÄÊı
+# å°†æ•°æ®ç¼©æ”¾åˆ° [-1, 1]ä¹‹é—´çš„æ•°
 def scale(train, test):
-    # ´´½¨Ò»¸öËõ·ÅÆ÷
+    # åˆ›å»ºä¸€ä¸ªç¼©æ”¾å™¨
     scaler = MinMaxScaler(feature_range=(-1, 1))
     scaler = scaler.fit(train)
     print(train)
-    # ½«train´Ó¶şÎ¬Êı×éµÄ¸ñÊ½×ª»¯ÎªÒ»¸ö23*2µÄÕÅÁ¿
+    # å°†trainä»äºŒç»´æ•°ç»„çš„æ ¼å¼è½¬åŒ–ä¸ºä¸€ä¸ª23*2çš„å¼ é‡
     #train = train.reshape(train.shape[0], train.shape[1])
-    # Ê¹ÓÃËõ·ÅÆ÷½«Êı¾İËõ·Åµ½[-1, 1]Ö®¼ä
+    # ä½¿ç”¨ç¼©æ”¾å™¨å°†æ•°æ®ç¼©æ”¾åˆ°[-1, 1]ä¹‹é—´
     train_scaled = scaler.transform(train)
     print(train_scaled)
     # transform test
@@ -53,7 +53,7 @@ def scale(train, test):
     test_scaled = scaler.transform(test)
     return scaler, train_scaled, test_scaled
 
-# Êı¾İÄæËõ·Å
+# æ•°æ®é€†ç¼©æ”¾
 def invert_scale(scaler, X, value):
 	new_row = [x for x in X] + [value]
 	array = numpy.array(new_row)
@@ -61,19 +61,19 @@ def invert_scale(scaler, X, value):
 	inverted = scaler.inverse_transform(array)
 	return inverted[0, -1]
 
-# ¹¹½¨Ò»¸öLSTMÍøÂçÄ£ĞÍ
+# æ„å»ºä¸€ä¸ªLSTMç½‘ç»œæ¨¡å‹
 def fit_lstm(train, batch_size, nb_epoch, neurons):
-    # ½«Êı¾İ¶ÔÖĞµÄX, y²ğ·Ö¿ª
+    # å°†æ•°æ®å¯¹ä¸­çš„X, yæ‹†åˆ†å¼€
 	X, y = train[:, 0:-1], train[:, -1]
 	#X = X.reshape(X.shape[0], 1, X.shape[1])
 	model = Sequential()
-    # neuronsÊÇÉñ¾­Ôª¸öÊı£¬batch_sizeÊÇÑù±¾¸öÊı£¬batch_input_shapeÊÇÊäÈëĞÎ×´£¬statefulÊÇ×´Ì¬±£Áô
+    # neuronsæ˜¯ç¥ç»å…ƒä¸ªæ•°ï¼Œbatch_sizeæ˜¯æ ·æœ¬ä¸ªæ•°ï¼Œbatch_input_shapeæ˜¯è¾“å…¥å½¢çŠ¶ï¼Œstatefulæ˜¯çŠ¶æ€ä¿ç•™
 	model.add(LSTM(neurons, batch_input_shape=(batch_size, X.shape[1], X.shape[2]), stateful=True))
 	model.add(Dense(1))
-    # ¶¨ÒåËğÊ§º¯ÊıºÍÓÅ»¯Æ÷
+    # å®šä¹‰æŸå¤±å‡½æ•°å’Œä¼˜åŒ–å™¨
 	model.compile(loss='mean_squared_error', optimizer='adam')
 	for i in range(nb_epoch):
-        # shuffle=FalseÊÇ²»»ìÏıÊı¾İË³Ğò
+        # shuffle=Falseæ˜¯ä¸æ··æ·†æ•°æ®é¡ºåº
 		model.fit(X, y, epochs=1, batch_size=batch_size, verbose=1, shuffle=False)
 		model.reset_states()
 	return model
@@ -84,41 +84,41 @@ def forecast_lstm(model, batch_size, X):
 	yhat = model.predict(X, batch_size=batch_size)
 	return yhat[0,0]
 
-# ¼ÓÔØÊı¾İ
+# åŠ è½½æ•°æ®
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 
-# ½«ËùÓĞÊı¾İ½øĞĞ²î·Ö×ª»»
+# å°†æ‰€æœ‰æ•°æ®è¿›è¡Œå·®åˆ†è½¬æ¢
 raw_values = series.values
 diff_values = difference(raw_values, 1)
 print(diff_values)
 
-# ½«Êı¾İ×ª»»Îª¼à¶½Ñ§Ï°ĞÍÊı¾İ,´ËÊ±Êä³öµÄsupervised_valuesÊÇÒ»¸ö¶şÎ¬Êı×é
+# å°†æ•°æ®è½¬æ¢ä¸ºç›‘ç£å­¦ä¹ å‹æ•°æ®,æ­¤æ—¶è¾“å‡ºçš„supervised_valuesæ˜¯ä¸€ä¸ªäºŒç»´æ•°ç»„
 supervised = timeseries_to_supervised(diff_values, 1)
 supervised_values = supervised.values
 print(supervised_values)
 
-# ½«Êı¾İ·Ö¸îÎªÑµÁ·¼¯ºÍ²âÊÔ¼¯£¬´ËÊ±·Ö¸îµÄÊı¾İ¼¯ÊÇ¶şÎ¬Êı×é
+# å°†æ•°æ®åˆ†å‰²ä¸ºè®­ç»ƒé›†å’Œæµ‹è¯•é›†ï¼Œæ­¤æ—¶åˆ†å‰²çš„æ•°æ®é›†æ˜¯äºŒç»´æ•°ç»„
 train, test = supervised_values[0:-12], supervised_values[-12:]
 
-# ½«ÑµÁ·¼¯ºÍ²âÊÔ¼¯¶¼Ëõ·Åµ½[-1, 1]Ö®¼ä
+# å°†è®­ç»ƒé›†å’Œæµ‹è¯•é›†éƒ½ç¼©æ”¾åˆ°[-1, 1]ä¹‹é—´
 scaler, train_scaled, test_scaled = scale(train, test)
 
-# # ¹¹½¨Ò»¸öLSTMÍøÂçÄ£ĞÍ£¬Ñù±¾Êı£º1£¬Ñ­»·ÑµÁ·´ÎÊı£º3000£¬LSTM²ãÉñ¾­Ôª¸öÊıÎª4
+# # æ„å»ºä¸€ä¸ªLSTMç½‘ç»œæ¨¡å‹ï¼Œæ ·æœ¬æ•°ï¼š1ï¼Œå¾ªç¯è®­ç»ƒæ¬¡æ•°ï¼š3000ï¼ŒLSTMå±‚ç¥ç»å…ƒä¸ªæ•°ä¸º4
 lstm_model = fit_lstm(train_scaled, 1, 3000, 4)
-# ÖØ¹¹ÊäÈëÊı¾İµÄĞÎ×´£¬
+# é‡æ„è¾“å…¥æ•°æ®çš„å½¢çŠ¶ï¼Œ
 train_reshaped = train_scaled[:, 0].reshape(len(train_scaled), 1, 1)
-# Ê¹ÓÃ¹¹ÔìµÄÍøÂçÄ£ĞÍ½øĞĞÔ¤²âÑµÁ·
+# ä½¿ç”¨æ„é€ çš„ç½‘ç»œæ¨¡å‹è¿›è¡Œé¢„æµ‹è®­ç»ƒ
 lstm_model.predict(train_reshaped, batch_size=1)
 
 # walk-forward validation on the test data
 predictions = list()
 for i in range(len(test_scaled)):
-	# µ¥²½Ô¤²â
+	# å•æ­¥é¢„æµ‹
 	X, y = test_scaled[i, 0:-1], test_scaled[i, -1]
 	yhat = forecast_lstm(lstm_model, 1, X)
-	# Êı¾İÄæËõ·Å
+	# æ•°æ®é€†ç¼©æ”¾
 	yhat = invert_scale(scaler, X, yhat)
-	# ²î·ÖÄæ×ª»»
+	# å·®åˆ†é€†è½¬æ¢
 	yhat = inverse_difference(raw_values, yhat, len(test_scaled)+1-i)
 	# store forecast
 	predictions.append(yhat)
