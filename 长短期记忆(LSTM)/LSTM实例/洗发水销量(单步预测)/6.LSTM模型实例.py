@@ -11,7 +11,11 @@ from keras.layers import LSTM
 from math import sqrt
 from matplotlib import pyplot
 import numpy
-
+"""
+单步预测是指一次预测一条数据
+训练时将训练数据全部输入，
+预测时，获取训练好的模型，每次输入一个数据X，预测出对应的
+"""
 # 数据结构处理
 def parser(x):
 	return datetime.strptime('190'+x, '%Y-%m')
@@ -53,35 +57,51 @@ def scale(train, test):
     test_scaled = scaler.transform(test)
     return scaler, train_scaled, test_scaled
 
-# 数据逆缩放
-def invert_scale(scaler, X, value):
-	new_row = [x for x in X] + [value]
+# 数据逆缩放，scaler是之前生成的缩放器，X是一维数组，y是数值
+def invert_scale(scaler, X, y):
+	# 将x，y转成一个list列表[x,y]->[0.26733207, -0.025524002]
+	# [y]可以将一个数值转化成一个单元素列表
+	new_row = [x for x in X] + [y]
+	#new_row = [X[0]]+[y]
+	# 将列表转化为一个,包含两个元素的一维数组，形状为(2,)->[0.26733207 -0.025524002]
 	array = numpy.array(new_row)
+	print(array.shape)
+	# 将一维数组重构成形状为(1,2)的，1行、每行2个元素的，2维数组->[[ 0.26733207 -0.025524002]]
 	array = array.reshape(1, len(array))
+	# 逆缩放输入的形状为(1,2),输出形状为(1,2) -> [[ 73 15]]
 	inverted = scaler.inverse_transform(array)
 	return inverted[0, -1]
 
-# 构建一个LSTM网络模型
+# 构建一个LSTM网络模型，并训练
 def fit_lstm(train, batch_size, nb_epoch, neurons):
-    # 将数据对中的X, y拆分开
-	X, y = train[:, 0:-1], train[:, -1]
-	X = X.reshape(X.shape[0], 1, X.shape[1])
-	model = Sequential()
-    # neurons是神经元个数，batch_size是样本个数，batch_input_shape是输入形状，stateful是状态保留
-	model.add(LSTM(neurons, batch_input_shape=(batch_size, X.shape[1], X.shape[2]), stateful=True))
-	model.add(Dense(1))
+    # 将数据对中的X, y拆分开，形状为[23*1]
+    X, y = train[:, 0:-1], train[:, -1]
+    # 将2D数据拼接成3D数据，形状为[23*1*1]
+    X = X.reshape(X.shape[0], 1, X.shape[1])
+    model = Sequential()
+    # neurons是神经元个数，batch_size是样本个数，batch_input_shape是输入形状，
+    # stateful是状态保留
+    # 1.同一批数据反复训练很多次，可保留每次训练状态供下次使用
+    # 2.不同批数据之间有顺序关联，可保留每次训练状态
+    # 3.不同批次数据，数据之间没有关联
+    model.add(LSTM(neurons, batch_input_shape=(batch_size, X.shape[1], X.shape[2]), stateful=True))
+    model.add(Dense(1))
     # 定义损失函数和优化器
-	model.compile(loss='mean_squared_error', optimizer='adam')
-	for i in range(nb_epoch):
+    model.compile(loss='mean_squared_error', optimizer='adam')
+    for i in range(nb_epoch):
         # shuffle=False是不混淆数据顺序
-		model.fit(X, y, epochs=1, batch_size=batch_size, verbose=1, shuffle=False)
-		model.reset_states()
-	return model
+        model.fit(X, y, epochs=1, batch_size=batch_size, verbose=1, shuffle=False)
+        # 每训练完一个轮回，重置一次网络
+        model.reset_states()
+    return model
 
-# make a one-step forecast
+# 开始单步预测，model是训练好的模型，batch_size是时间步，X是一个一维数组
 def forecast_lstm(model, batch_size, X):
+	# 将形状为(1,)的，包含一个元素的一维数组X，构造成形状为(1,1,1)的3D张量
 	X = X.reshape(1, 1, len(X))
+	# 输出yhat形状为(1,1)的二维数组
 	yhat = model.predict(X, batch_size=batch_size)
+	# 返回二维数组中，第一行一列的yhat的数值
 	return yhat[0,0]
 
 # 加载数据
@@ -90,12 +110,10 @@ series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, s
 # 将所有数据进行差分转换
 raw_values = series.values
 diff_values = difference(raw_values, 1)
-print(diff_values)
 
 # 将数据转换为监督学习型数据,此时输出的supervised_values是一个二维数组
 supervised = timeseries_to_supervised(diff_values, 1)
 supervised_values = supervised.values
-print(supervised_values)
 
 # 将数据分割为训练集和测试集，此时分割的数据集是二维数组
 train, test = supervised_values[0:-12], supervised_values[-12:]
@@ -103,32 +121,39 @@ train, test = supervised_values[0:-12], supervised_values[-12:]
 # 将训练集和测试集都缩放到[-1, 1]之间
 scaler, train_scaled, test_scaled = scale(train, test)
 
-# # 构建一个LSTM网络模型，样本数：1，循环训练次数：3000，LSTM层神经元个数为4
-lstm_model = fit_lstm(train_scaled, 1, 3000, 4)
+
+# 构建一个LSTM网络模型，并训练，样本数：1，循环训练次数：3000，LSTM层神经元个数为4
+lstm_model = fit_lstm(train_scaled, 1, 10000, 4)
 # 重构输入数据的形状，
+print(train_scaled)
 train_reshaped = train_scaled[:, 0].reshape(len(train_scaled), 1, 1)
+print(train_reshaped)
 # 使用构造的网络模型进行预测训练
 lstm_model.predict(train_reshaped, batch_size=1)
-
-# walk-forward validation on the test data
+#print(lstm_model.predict(train_reshaped, batch_size=1))
+# 遍历测试数据，对数据进行单步预测
 predictions = list()
 for i in range(len(test_scaled)):
-	# 单步预测
+	# 将(12,2)的2D训练集test_scaled拆分成X,y；
+	# 其中X是第i行的0到-1列，形状是(1,)的包含一个元素的一维数组；y是第i行，倒数第1列，是一个数值；
 	X, y = test_scaled[i, 0:-1], test_scaled[i, -1]
+	# 将训练好的模型lstm_model，X变量，传入预测函数，定义步长为1，
 	yhat = forecast_lstm(lstm_model, 1, X)
-	# 数据逆缩放
+	print(yhat.shape)
+	# 对预测出的y值逆缩放
 	yhat = invert_scale(scaler, X, yhat)
-	# 差分逆转换
+	# 对预测出的y值逆差分转换
 	yhat = inverse_difference(raw_values, yhat, len(test_scaled)+1-i)
-	# store forecast
+	# 存储预测的y值
 	predictions.append(yhat)
+	# 获取真实的y值
 	expected = raw_values[len(train) + i + 1]
 	print('Month=%d, Predicted=%f, Expected=%f' % (i+1, yhat, expected))
 
-# report performance
+# 求真实值和预测值之间的标准差
 rmse = sqrt(mean_squared_error(raw_values[-12:], predictions))
 print('Test RMSE: %.3f' % rmse)
-# line plot of observed vs predicted
+# 作图展示
 pyplot.plot(raw_values[-12:])
 pyplot.plot(predictions)
 pyplot.show()
