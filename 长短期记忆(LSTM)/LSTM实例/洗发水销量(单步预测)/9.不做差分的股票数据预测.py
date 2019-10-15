@@ -90,7 +90,8 @@ def fit_lstm(train, batch_size, nb_epoch, neurons):
     model.compile(loss='mean_squared_error', optimizer='adam')
     for i in range(nb_epoch):
         # shuffle=False是不混淆数据顺序
-        model.fit(X, y, epochs=1, batch_size=batch_size, verbose=1, shuffle=False)
+        hh = model.fit(X, y, epochs=10, batch_size=batch_size, verbose=1, shuffle=False)
+        # drow(hh)
         # 每训练完一个轮回，重置一次网络
         model.reset_states()
     return model
@@ -103,6 +104,17 @@ def forecast_lstm(model, batch_size, X):
 	yhat = model.predict(X, batch_size=batch_size)
 	# 返回二维数组中，第一行一列的yhat的数值
 	return yhat[0,0]
+
+
+# 作图
+def drow(hh):
+    pyplot.plot(hh.history['loss'])
+    pyplot.plot(hh.history.history['val_loss'])
+    pyplot.title('model train vs validation loss')
+    pyplot.ylabel('loss')
+    pyplot.xlabel('epoch')
+    pyplot.legend(['train', 'validation'], loc='upper right')
+    pyplot.show()
 
 # 加载数据
 series = read_csv('stocktest.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
@@ -125,11 +137,16 @@ scaler, train_scaled, test_scaled = scale(train, test)
 
 
 # 构建一个LSTM网络模型，并训练，样本数：1，循环训练次数：3000，LSTM层神经元个数为4
-lstm_model = fit_lstm(train_scaled, 1, 1000, 8)
+lstm_model = fit_lstm(train_scaled, 1, 10, 8)
 # 重构输入数据的形状，
 print(train_scaled)
 train_reshaped = train_scaled[:, 0].reshape(len(train_scaled), 1, 1)
 print(train_reshaped)
+
+# plot train and validation loss
+
+
+
 # 使用构造的网络模型进行预测训练
 lstm_model.predict(train_reshaped, batch_size=1)
 #print(lstm_model.predict(train_reshaped, batch_size=1))
@@ -162,11 +179,3 @@ pyplot.plot(predictions)
 pyplot.show()
 
 
-# 展示网络训练拟合参数
-pyplot.plot(lstm_model.history['loss'])
-pyplot.plot(lstm_model.history['val_loss'])
-pyplot.title('model train vs validation loss')
-pyplot.ylabel('loss')
-pyplot.xlabel('epoch')
-pyplot.legend(['train', 'validation'], loc='upper right')
-pyplot.show()
