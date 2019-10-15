@@ -1,4 +1,4 @@
-﻿from pandas import read_csv
+from pandas import read_csv
 from pandas import datetime
 from sklearn.metrics import mean_squared_error
 from math import sqrt

@@ -1,4 +1,4 @@
-﻿from pandas import read_csv
+from pandas import read_csv
 from pandas import datetime
 from pandas import DataFrame
 from pandas import concat

@@ -1,4 +1,4 @@
-﻿from pandas import read_csv
+from pandas import read_csv
 from pandas import datetime
 from pandas import Series
 from sklearn.preprocessing import MinMaxScaler
