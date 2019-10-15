@@ -110,6 +110,8 @@ def forecast_lstm(model, batch_size, X):
 
 # 加载数据
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
+# 最后N条数据作为测试数据
+testNum = 12
 
 # 将所有数据进行差分转换
 raw_values = series.values
@@ -119,8 +121,8 @@ diff_values = difference(raw_values, 1)
 supervised = timeseries_to_supervised(diff_values, 1)
 supervised_values = supervised.values
 
-# 将数据分割为训练集和测试集，此时分割的数据集是二维数组
-train, test = supervised_values[0:-12], supervised_values[-12:]
+# 将数据分割为训练集和测试集，此时分割的数据集是二维数组（取最后12条数据作为测试数据）
+train, test = supervised_values[0:-testNum], supervised_values[-testNum:]
 
 # 将训练集和测试集都缩放到[-1, 1]之间
 scaler, train_scaled, test_scaled = scale(train, test)
@@ -137,7 +139,7 @@ lstm_model.predict(train_reshaped, batch_size=1)
 # 遍历测试数据，对数据进行单步预测
 predictions = list()
 for i in range(len(test_scaled)):
-	# 将(12,2)的2D训练集test_scaled拆分成X,y；
+	# 将(testNum,2)的2D训练集test_scaled拆分成X,y；
 	# 其中X是第i行的0到-1列，形状是(1,)的包含一个元素的一维数组；y是第i行，倒数第1列，是一个数值；
 	X, y = test_scaled[i, 0:-1], test_scaled[i, -1]
 	# 将训练好的模型lstm_model，X变量，传入预测函数，定义步长为1，
@@ -151,12 +153,13 @@ for i in range(len(test_scaled)):
 	predictions.append(yhat)
 	# 获取真实的y值
 	expected = raw_values[len(train) + i + 1]
+    # 输出对比预测值与真实值做
 	print('Month=%d, Predicted=%f, Expected=%f' % (i+1, yhat, expected))
 
 # 求真实值和预测值之间的标准差
-rmse = sqrt(mean_squared_error(raw_values[-12:], predictions))
+rmse = sqrt(mean_squared_error(raw_values[-testNum:], predictions))
 print('Test RMSE: %.3f' % rmse)
 # 作图展示
-pyplot.plot(raw_values[-12:])
+pyplot.plot(raw_values[-testNum:])
 pyplot.plot(predictions)
 pyplot.show()

@@ -115,15 +115,15 @@ diff_values = difference(raw_values, 1)
 supervised = timeseries_to_supervised(diff_values, 1)
 supervised_values = supervised.values
 
-# 将数据分割为训练集和测试集，此时分割的数据集是二维数组
-train, test = supervised_values[0:-4], supervised_values[-4:]
+# 将数据分割为训练集和测试集，此时分割的数据集是二维数组（取最后15条数据作为测试数据）
+train, test = supervised_values[0:-15], supervised_values[-15:]
 
 # 将训练集和测试集都缩放到[-1, 1]之间
 scaler, train_scaled, test_scaled = scale(train, test)
 
 
 # 构建一个LSTM网络模型，并训练，样本数：1，循环训练次数：3000，LSTM层神经元个数为4
-lstm_model = fit_lstm(train_scaled, 1, 1000, 4)
+lstm_model = fit_lstm(train_scaled, 1, 1000, 8)
 # 重构输入数据的形状，
 print(train_scaled)
 train_reshaped = train_scaled[:, 0].reshape(len(train_scaled), 1, 1)
@@ -148,12 +148,13 @@ for i in range(len(test_scaled)):
 	predictions.append(yhat)
 	# 获取真实的y值
 	expected = raw_values[len(train) + i + 1]
+    # 对比真实值和预测值
 	print('Month=%d, Predicted=%f, Expected=%f' % (i+1, yhat, expected))
 
 # 求真实值和预测值之间的标准差
-rmse = sqrt(mean_squared_error(raw_values[-4:], predictions))
+rmse = sqrt(mean_squared_error(raw_values[-15:], predictions))
 print('Test RMSE: %.3f' % rmse)
 # 作图展示
-pyplot.plot(raw_values[-4:])
+pyplot.plot(raw_values[-15:])
 pyplot.plot(predictions)
 pyplot.show()
