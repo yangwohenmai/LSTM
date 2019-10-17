@@ -90,8 +90,7 @@ def fit_lstm(train, batch_size, nb_epoch, neurons):
     model.compile(loss='mean_squared_error', optimizer='adam')
     for i in range(nb_epoch):
         # shuffle=False是不混淆数据顺序
-        hh = model.fit(X, y, epochs=10, batch_size=batch_size, verbose=1, shuffle=False)
-        # drow(hh)
+        model.fit(X, y, epochs=10, batch_size=batch_size, verbose=1, shuffle=False)
         # 每训练完一个轮回，重置一次网络
         model.reset_states()
     return model
@@ -106,15 +105,7 @@ def forecast_lstm(model, batch_size, X):
 	return yhat[0,0]
 
 
-# 作图
-def drow(hh):
-    pyplot.plot(hh.history['loss'])
-    pyplot.plot(hh.history.history['val_loss'])
-    pyplot.title('model train vs validation loss')
-    pyplot.ylabel('loss')
-    pyplot.xlabel('epoch')
-    pyplot.legend(['train', 'validation'], loc='upper right')
-    pyplot.show()
+
 
 # 加载数据
 series = read_csv('stocktest.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
