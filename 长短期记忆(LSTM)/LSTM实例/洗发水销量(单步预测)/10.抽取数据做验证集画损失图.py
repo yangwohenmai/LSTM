@@ -181,5 +181,3 @@ print('Test RMSE: %.3f' % rmse)
 pyplot.plot(raw_values[-testNum:])
 pyplot.plot(predictions)
 pyplot.show()
-
-

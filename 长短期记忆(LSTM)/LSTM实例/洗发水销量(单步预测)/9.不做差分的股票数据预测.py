@@ -134,10 +134,6 @@ print(train_scaled)
 train_reshaped = train_scaled[:, 0].reshape(len(train_scaled), 1, 1)
 print(train_reshaped)
 
-# plot train and validation loss
-
-
-
 # 使用构造的网络模型进行预测训练
 lstm_model.predict(train_reshaped, batch_size=1)
 #print(lstm_model.predict(train_reshaped, batch_size=1))
