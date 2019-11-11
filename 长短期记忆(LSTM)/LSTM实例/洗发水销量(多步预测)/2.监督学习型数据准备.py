@@ -64,8 +64,8 @@ def prepare_data(series, n_test, n_lag, n_seq):
 # 加载数据
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 n_lag = 1
-# 监督学习数据每一个sample的步长
-n_seq = 3
+# 监督学习数据每一个sample的步长,这里每次预测3步,总步长为4
+n_seq = 4
 # 测试数据数量
 n_test = 10
 # 构建数据
