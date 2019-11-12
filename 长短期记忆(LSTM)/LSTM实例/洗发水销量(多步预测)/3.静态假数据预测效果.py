@@ -16,13 +16,6 @@ def series_to_supervised(data, n_out=1, dropnan=True):
     df = DataFrame(data)
     print(df)
     cols, names = list(), list()
-    # input sequence (t-n, ... t-1)
-    #for i in range(n_in, 0, -1):
-    #    cols.append(df.shift(i))
-    #    print(cols)
-    #    names += [('var%d(t-%d)' % (j+1, i)) for j in range(n_vars)]
-    #    print(names)
-    # forecast sequence (t, t+1, ... t+n)
     # 构建(t, t+1, t+2, t+3)四列监督型数据
     for i in range(0, n_out):
         cols.append(df.shift(-i))
@@ -62,39 +55,44 @@ def prepare_data(series, n_test, n_seq):
     return train, test
 
 # 组织预测数据
-def make_forecasts(train, test, n_lag, n_seq):
+def make_forecasts(test, n_seq):
     forecasts = list()
     for i in range(len(test)):
-        X, y = test[i, 0:n_lag], test[i, n_lag:]
-        # 假装预测，取当前序列最后一个值3遍，作为预测值
-        forecast = [X[-1] for i in range(n_seq)]
+        # X取二维数组test中每行第一列，y取每行2，3，4列
+        X, y = test[i, 0:1], test[i, 1:]
+        # 假装预测，取X的值3遍，作为预测值
+        forecast = [X[0] for i in range(n_seq)]
         # 将假的预测值存起来
         forecasts.append(forecast)
     return forecasts
 
-# 评估预测结果的均方差
-def evaluate_forecasts(test, forecasts, n_lag, n_seq):
-	for i in range(n_seq):
-		actual = test[:,(n_lag+i)]
-		predicted = [forecast[i] for forecast in forecasts]
-		rmse = sqrt(mean_squared_error(actual, predicted))
-		print('t+%d RMSE: %f' % ((i+1), rmse))
+# 评估预测结果的均方差，并没有什么用
+def evaluate_forecasts(test, forecasts):
+    # 找三个序列评估一下预测值均方差
+    for i in range(3):
+        # 用test构造真实值
+        actual = test[:,(i+1)]
+        print(actual)
+        # 用test构造预测值
+        predicted = [forecast[i] for forecast in forecasts]
+        print(predicted)
+        rmse = sqrt(mean_squared_error(actual, predicted))
+        print('t+%d RMSE: %f' % ((i+1), rmse))
 
-# plot the forecasts in the context of the original dataset
+# 在原始数据上画出预测数据
 def plot_forecasts(series, forecasts, n_test):
-	# plot the entire dataset in blue
+	# 蓝线画出真实数据
 	pyplot.plot(series.values)
-	# plot the forecasts in red
+	# 红线画出预测值
 	for i in range(len(forecasts)):
 		off_s = len(series) - n_test + i - 1
 		off_e = off_s + len(forecasts[i]) + 1
 		xaxis = [x for x in range(off_s, off_e)]
 		yaxis = [series.values[off_s]] + forecasts[i]
 		pyplot.plot(xaxis, yaxis, color='red')
-	# show the plot
 	pyplot.show()
 
-# load dataset
+# 加载数据
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 # configure
 n_lag = 1
@@ -102,9 +100,9 @@ n_seq = 3
 n_test = 10
 # 准备步长为4的监督型数据
 train, test = prepare_data(series, n_test, 4)
-# make forecasts
-forecasts = make_forecasts(train, test, n_lag, n_seq)
-# evaluate forecasts
-evaluate_forecasts(test, forecasts, n_lag, n_seq)
-# plot forecasts
+# 组织预测数据
+forecasts = make_forecasts(test, n_seq)
+# 评估预测结果
+evaluate_forecasts(test, forecasts)
+# 做参照图
 plot_forecasts(series, forecasts, n_test+2)
