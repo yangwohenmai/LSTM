@@ -77,17 +77,17 @@ def prepare_data(series, n_test, n_lag, n_seq):
     train, test = supervised_values[0:-n_test], supervised_values[-n_test:]
     return scaler, train, test
 
-# fit an LSTM network to training data
+# 你和一个LSTM网络，训练数据
 def fit_lstm(train, n_lag, n_seq, n_batch, nb_epoch, n_neurons):
-	# reshape training into [samples, timesteps, features]
+	# 重构训练数据结构-》[samples, timesteps, features]
 	X, y = train[:, 0:n_lag], train[:, n_lag:]
 	X = X.reshape(X.shape[0], 1, X.shape[1])
-	# design network
+	# 网络结构
 	model = Sequential()
 	model.add(LSTM(n_neurons, batch_input_shape=(n_batch, X.shape[1], X.shape[2]), stateful=True))
 	model.add(Dense(y.shape[1]))
 	model.compile(loss='mean_squared_error', optimizer='adam')
-	# fit network
+	# 开始训练
 	for i in range(nb_epoch):
 		model.fit(X, y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
 		model.reset_states()
@@ -107,9 +107,9 @@ def make_forecasts(model, n_batch, train, test, n_lag, n_seq):
 	forecasts = list()
 	for i in range(len(test)):
 		X, y = test[i, 0:n_lag], test[i, n_lag:]
-		# make forecast
+		# 预测
 		forecast = forecast_lstm(model, X, n_batch)
-		# store the forecast
+		# 存储预测数据
 		forecasts.append(forecast)
 	return forecasts
 
@@ -130,14 +130,14 @@ def inverse_transform(series, forecasts, scaler, n_test):
 		# create array from forecast
 		forecast = array(forecasts[i])
 		forecast = forecast.reshape(1, len(forecast))
-		# invert scaling
+		# 数据逆缩放
 		inv_scale = scaler.inverse_transform(forecast)
 		inv_scale = inv_scale[0, :]
-		# invert differencing
+		# 数据逆差分
 		index = len(series) - n_test + i - 1
 		last_ob = series.values[index]
 		inv_diff = inverse_difference(last_ob, inv_scale)
-		# store
+		# 存储转换后的数据
 		inverted.append(inv_diff)
 	return inverted
 
@@ -174,9 +174,9 @@ n_batch = 1
 n_neurons = 1
 # 数据差分，缩放，重构成监督学习型数据
 scaler, train, test = prepare_data(series, n_test, n_lag, n_seq)
-# fit model
+# 拟合模型
 model = fit_lstm(train, n_lag, n_seq, n_batch, n_epochs, n_neurons)
-# make forecasts
+# 开始预测
 forecasts = make_forecasts(model, n_batch, train, test, n_lag, n_seq)
 # inverse transform forecasts and test
 forecasts = inverse_transform(series, forecasts, scaler, n_test+2)
