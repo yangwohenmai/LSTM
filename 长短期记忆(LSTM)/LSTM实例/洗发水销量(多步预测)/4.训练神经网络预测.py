@@ -40,7 +40,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
 		agg.dropna(inplace=True)
 	return agg
 
-# create a differenced series
+# 差分算法
 def difference(dataset, interval=1):
 	diff = list()
 	for i in range(interval, len(dataset)):
@@ -48,24 +48,34 @@ def difference(dataset, interval=1):
 		diff.append(value)
 	return Series(diff)
 
-# transform series into train and test sets for supervised learning
+# 数据特征工程
 def prepare_data(series, n_test, n_lag, n_seq):
-	# extract raw values
-	raw_values = series.values
-	# transform data to be stationary
-	diff_series = difference(raw_values, 1)
-	diff_values = diff_series.values
-	diff_values = diff_values.reshape(len(diff_values), 1)
-	# rescale values to -1, 1
-	scaler = MinMaxScaler(feature_range=(-1, 1))
-	scaled_values = scaler.fit_transform(diff_values)
-	scaled_values = scaled_values.reshape(len(scaled_values), 1)
-	# transform into supervised learning problem X, y
-	supervised = series_to_supervised(scaled_values, n_lag, n_seq)
-	supervised_values = supervised.values
-	# split into train and test sets
-	train, test = supervised_values[0:-n_test], supervised_values[-n_test:]
-	return scaler, train, test
+    # 提取文本中的数据
+    raw_values = series.values
+    # 对数据进行差分计算
+    diff_series = difference(raw_values, 1)
+    # 提取差分后的数据
+    diff_values = diff_series.values
+    print(diff_values)
+    # 重构成n行一列的数据
+    diff_values = diff_values.reshape(len(diff_values), 1)
+    print(diff_values)
+    # 定义数据缩放在（-1，1）之间
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    print(scaler)
+    # 对数据进行缩放
+    scaled_values = scaler.fit_transform(diff_values)
+    print(scaled_values)
+    # 将缩放后的数据重构成n行一列的数据
+    scaled_values = scaled_values.reshape(len(scaled_values), 1)
+    print(scaled_values)
+    # 将数据构建成步长为n_seq的监督学习型数据
+    supervised = series_to_supervised(scaled_values, n_lag, n_seq)
+    print(supervised)
+    supervised_values = supervised.values
+    # 将数据分割出n_test条作为测试数据
+    train, test = supervised_values[0:-n_test], supervised_values[-n_test:]
+    return scaler, train, test
 
 # fit an LSTM network to training data
 def fit_lstm(train, n_lag, n_seq, n_batch, nb_epoch, n_neurons):
@@ -162,7 +172,7 @@ n_test = 10
 n_epochs = 1500
 n_batch = 1
 n_neurons = 1
-# prepare data
+# 数据差分，缩放，重构成监督学习型数据
 scaler, train, test = prepare_data(series, n_test, n_lag, n_seq)
 # fit model
 model = fit_lstm(train, n_lag, n_seq, n_batch, n_epochs, n_neurons)
