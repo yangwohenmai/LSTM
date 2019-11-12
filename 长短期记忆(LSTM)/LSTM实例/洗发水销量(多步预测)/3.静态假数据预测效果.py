@@ -61,22 +61,18 @@ def prepare_data(series, n_test, n_seq):
     train, test = supervised_values[0:-n_test], supervised_values[-n_test:]
     return train, test
 
-# make a persistence forecast
-def persistence(last_ob, n_seq):
-	return [last_ob for i in range(n_seq)]
-
-# evaluate the persistence model
+# 组织预测数据
 def make_forecasts(train, test, n_lag, n_seq):
-	forecasts = list()
-	for i in range(len(test)):
-		X, y = test[i, 0:n_lag], test[i, n_lag:]
-		# 假装预测，取当前序列最后一个值3遍，作为预测值
-		forecast = persistence(X[-1], n_seq)
-		# 将预测值存起来
-		forecasts.append(forecast)
-	return forecasts
+    forecasts = list()
+    for i in range(len(test)):
+        X, y = test[i, 0:n_lag], test[i, n_lag:]
+        # 假装预测，取当前序列最后一个值3遍，作为预测值
+        forecast = [X[-1] for i in range(n_seq)]
+        # 将假的预测值存起来
+        forecasts.append(forecast)
+    return forecasts
 
-# evaluate the RMSE for each forecast time step
+# 评估预测结果的均方差
 def evaluate_forecasts(test, forecasts, n_lag, n_seq):
 	for i in range(n_seq):
 		actual = test[:,(n_lag+i)]
@@ -104,7 +100,7 @@ series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, s
 n_lag = 1
 n_seq = 3
 n_test = 10
-# prepare data
+# 准备步长为4的监督型数据
 train, test = prepare_data(series, n_test, 4)
 # make forecasts
 forecasts = make_forecasts(train, test, n_lag, n_seq)
