@@ -21,7 +21,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     #    print(names)
     # forecast sequence (t, t+1, ... t+n)
     # 构建(t, t+1, t+2, t+3)四列监督型数据
-    for i in range(0, n_out+1):
+    for i in range(0, n_out):
         cols.append(df.shift(-i))
         print(cols)
         if i == 0:
