@@ -87,7 +87,9 @@ def plot_forecasts(series, forecasts, n_test):
 	for i in range(len(forecasts)):
 		off_s = len(series) - n_test + i - 1
 		off_e = off_s + len(forecasts[i]) + 1
+        # 赋值x轴坐标
 		xaxis = [x for x in range(off_s, off_e)]
+        # 赋值y轴坐标
 		yaxis = [series.values[off_s]] + forecasts[i]
 		pyplot.plot(xaxis, yaxis, color='red')
 	pyplot.show()
