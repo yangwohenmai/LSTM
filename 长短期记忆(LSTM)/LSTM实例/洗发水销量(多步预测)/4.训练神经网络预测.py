@@ -12,11 +12,11 @@ from math import sqrt
 from matplotlib import pyplot
 from numpy import array
 
-# date-time parsing function for loading the dataset
+# 修正数据格式
 def parser(x):
 	return datetime.strptime('190'+x, '%Y-%m')
 
-# convert time series into supervised learning problem
+# 将时间序列转换成监督学习数据
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
 	n_vars = 1 if type(data) is list else data.shape[1]
 	df = DataFrame(data)
@@ -40,7 +40,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
 		agg.dropna(inplace=True)
 	return agg
 
-# 差分算法
+# 数据差分法
 def difference(dataset, interval=1):
 	diff = list()
 	for i in range(interval, len(dataset)):
@@ -48,7 +48,7 @@ def difference(dataset, interval=1):
 		diff.append(value)
 	return Series(diff)
 
-# 数据特征工程
+# 数据特征工程,差分，缩放，分割
 def prepare_data(series, n_test, n_lag, n_seq):
     # 提取文本中的数据
     raw_values = series.values
@@ -60,7 +60,7 @@ def prepare_data(series, n_test, n_lag, n_seq):
     # 重构成n行一列的数据
     diff_values = diff_values.reshape(len(diff_values), 1)
     print(diff_values)
-    # 定义数据缩放在（-1，1）之间
+    # 定义数据缩放在(-1，1)之间
     scaler = MinMaxScaler(feature_range=(-1, 1))
     print(scaler)
     # 对数据进行缩放
@@ -79,21 +79,27 @@ def prepare_data(series, n_test, n_lag, n_seq):
 
 # 你和一个LSTM网络，训练数据
 def fit_lstm(train, n_lag, n_seq, n_batch, nb_epoch, n_neurons):
-	# 重构训练数据结构-》[samples, timesteps, features]
-	X, y = train[:, 0:n_lag], train[:, n_lag:]
-	X = X.reshape(X.shape[0], 1, X.shape[1])
-	# 网络结构
-	model = Sequential()
-	model.add(LSTM(n_neurons, batch_input_shape=(n_batch, X.shape[1], X.shape[2]), stateful=True))
-	model.add(Dense(y.shape[1]))
-	model.compile(loss='mean_squared_error', optimizer='adam')
-	# 开始训练
-	for i in range(nb_epoch):
-		model.fit(X, y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
-		model.reset_states()
-	return model
+    # 每个4位序列中，第1位作为x，后3位作为预测值y
+    X, y = train[:, 0:n_lag], train[:, n_lag:]
+    # 重构训练数据结构->[samples, timesteps, features]->[22,1,1]
+    X = X.reshape(X.shape[0], 1, X.shape[1])
+    print(X)
+    print(y)
+    # 网络结构
+    model = Sequential()
+    # 一个神经元， batch_input_shape(1,1,1)，传递序列状态
+    model.add(LSTM(n_neurons, batch_input_shape=(n_batch, X.shape[1], X.shape[2]), stateful=True))
+    model.add(Dense(y.shape[1]))
+    model.compile(loss='mean_squared_error', optimizer='adam')
+    # 开始训练
+    for i in range(nb_epoch):
+        # 数据训练1次，每次训练1组数据，不混淆序列顺序
+        model.fit(X, y, epochs=1, batch_size=n_batch, verbose=0, shuffle=False)
+        # 每次训练完初始化网络状态（不是权重）
+        model.reset_states()
+    return model
 
-# make one forecast with an LSTM,
+# LSTM 单步预测
 def forecast_lstm(model, X, n_batch):
 	# reshape input pattern to [samples, timesteps, features]
 	X = X.reshape(1, 1, len(X))
@@ -102,18 +108,20 @@ def forecast_lstm(model, X, n_batch):
 	# convert to array
 	return [x for x in forecast[0, :]]
 
-# evaluate the persistence model
-def make_forecasts(model, n_batch, train, test, n_lag, n_seq):
-	forecasts = list()
-	for i in range(len(test)):
-		X, y = test[i, 0:n_lag], test[i, n_lag:]
-		# 预测
-		forecast = forecast_lstm(model, X, n_batch)
-		# 存储预测数据
-		forecasts.append(forecast)
-	return forecasts
+# 用模型进行预测
+def make_forecasts(model, n_batch, test, n_lag, n_seq):
+    forecasts = list()
+    # 对X值进行逐个预测
+    for i in range(len(test)):
+        # X, y = test[i, 0:n_lag], test[i, n_lag:]
+        X = test[i, 0:n_lag]
+        # LSTM 单步预测
+        forecast = forecast_lstm(model, X, n_batch)
+        # 存储预测数据
+        forecasts.append(forecast)
+    return forecasts
 
-# invert differenced forecast
+# 对预测数据逆差分
 def inverse_difference(last_ob, forecast):
 	# invert first forecast
 	inverted = list()
@@ -123,7 +131,7 @@ def inverse_difference(last_ob, forecast):
 		inverted.append(forecast[i] + inverted[i-1])
 	return inverted
 
-# inverse data transform on forecasts
+# 对预测后的数据逆转换
 def inverse_transform(series, forecasts, scaler, n_test):
 	inverted = list()
 	for i in range(len(forecasts)):
@@ -141,7 +149,7 @@ def inverse_transform(series, forecasts, scaler, n_test):
 		inverted.append(inv_diff)
 	return inverted
 
-# evaluate the RMSE for each forecast time step
+# 评估预测结果的均方差
 def evaluate_forecasts(test, forecasts, n_lag, n_seq):
 	for i in range(n_seq):
 		actual = [row[i] for row in test]
@@ -165,24 +173,26 @@ def plot_forecasts(series, forecasts, n_test):
 
 # load dataset
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
-# configure
-n_lag = 1
-n_seq = 3
-n_test = 10
-n_epochs = 1500
-n_batch = 1
-n_neurons = 1
+# 参数配置
+n_lag = 1       # 用一个数据
+n_seq = 3       # 预测三个数据
+n_test = 10     # 测试数据为10组
+n_epochs = 1500 # 训练1500次
+n_batch = 1     # 每次训练几组数据
+n_neurons = 1   # 神经节点为1
 # 数据差分，缩放，重构成监督学习型数据
 scaler, train, test = prepare_data(series, n_test, n_lag, n_seq)
 # 拟合模型
 model = fit_lstm(train, n_lag, n_seq, n_batch, n_epochs, n_neurons)
 # 开始预测
-forecasts = make_forecasts(model, n_batch, train, test, n_lag, n_seq)
-# inverse transform forecasts and test
+forecasts = make_forecasts(model, n_batch, test, n_lag, n_seq)
+# 将预测后的数据逆转换
 forecasts = inverse_transform(series, forecasts, scaler, n_test+2)
+# 从测试数据中分离出y对应的真实值
 actual = [row[n_lag:] for row in test]
+# 对真实值逆转换
 actual = inverse_transform(series, actual, scaler, n_test+2)
-# evaluate forecasts
+# 评估预测值和真实值的RSM
 evaluate_forecasts(actual, forecasts, n_lag, n_seq)
-# plot forecasts
+# 作图
 plot_forecasts(series, forecasts, n_test+2)
