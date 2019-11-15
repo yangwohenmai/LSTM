@@ -101,11 +101,11 @@ def fit_lstm(train, n_lag, n_seq, n_batch, nb_epoch, n_neurons):
 
 # LSTM 单步预测
 def forecast_lstm(model, X, n_batch):
-	# reshape input pattern to [samples, timesteps, features]
+	# 重构输入形状 (1,1,1) [samples, timesteps, features]
 	X = X.reshape(1, 1, len(X))
-	# make forecast
+	# 预测张量形状为 (1,3)
 	forecast = model.predict(X, batch_size=n_batch)
-	# convert to array
+	# 将预测结果[[XX,XX,XX]]转换成list数组
 	return [x for x in forecast[0, :]]
 
 # 用模型进行预测
@@ -157,7 +157,7 @@ def evaluate_forecasts(test, forecasts, n_lag, n_seq):
 		rmse = sqrt(mean_squared_error(actual, predicted))
 		print('t+%d RMSE: %f' % ((i+1), rmse))
 
-# plot the forecasts in the context of the original dataset
+# 作图
 def plot_forecasts(series, forecasts, n_test):
 	# plot the entire dataset in blue
 	pyplot.plot(series.values)
@@ -171,7 +171,7 @@ def plot_forecasts(series, forecasts, n_test):
 	# show the plot
 	pyplot.show()
 
-# load dataset
+# 加载数据
 series = read_csv('shampoo-sales.csv', header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 # 参数配置
 n_lag = 1       # 用一个数据
