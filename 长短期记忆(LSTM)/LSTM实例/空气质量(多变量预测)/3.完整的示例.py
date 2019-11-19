@@ -90,18 +90,22 @@ model.compile(loss='mae', optimizer='adam')
 # 拟合网络
 history = model.fit(train_X, train_y, epochs=50, batch_size=72, validation_data=(test_X, test_y), verbose=2, shuffle=False)
 # 图像展示训练损失
-pyplot.plot(history.history['loss'], label='train')
-pyplot.plot(history.history['val_loss'], label='test')
-pyplot.legend()
-pyplot.show()
+#pyplot.plot(history.history['loss'], label='train')
+#pyplot.plot(history.history['val_loss'], label='test')
+#pyplot.legend()
+#pyplot.show()
  
 # 使用拟合后的网络进行预测
 yhat = model.predict(test_X)
-print(yhat)
+print(yhat[0:6,:])
+print(test_X[0:6,:])
+# xx = test_X[0:35000,:].reshape((17500,2 ,8))
+# print(xx)
+# 将3D转换为2D
 test_X = test_X.reshape((test_X.shape[0], test_X.shape[2]))
-print(test_X)
 # invert scaling for forecast
 inv_yhat = concatenate((yhat, test_X[:, 1:]), axis=1)
+print(inv_yhat)
 # 对预测数据逆缩放
 inv_yhat = scaler.inverse_transform(inv_yhat)
 inv_yhat = inv_yhat[:,0]
