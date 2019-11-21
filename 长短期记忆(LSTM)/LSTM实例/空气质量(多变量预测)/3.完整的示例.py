@@ -62,9 +62,11 @@ scaler = MinMaxScaler(feature_range=(0, 1))
 scaled = scaler.fit_transform(values)
 # 将数据格式化成监督学习型数据
 reframed = series_to_supervised(scaled, 1, 1)
-print(reframed)
-# 删掉那些我们不想预测的列
+print(reframed.head())
+# 删掉那些我们不想预测的列,axis=1列操作
 reframed.drop(reframed.columns[[9,10,11,12,13,14,15]], axis=1, inplace=True)
+# 最终每行数据格式如下，其中v1(t-1)~v8(t-1)表示前一天的数据，v1(t)表示当天要预测的数据：
+# v1(t-1),v2(t-2),v3(t-3),v4(t-4),v5(t-5),v6(t-6),v7(t-7),v8(t-1),v1(t)
 print(reframed.head())
  
 # split into train and test sets
@@ -77,9 +79,10 @@ test = values[n_train_hours:, :]
 # 将数据分割成输入和输出，最后一列数据作为输出数据
 train_X, train_y = train[:, :-1], train[:, -1]
 test_X, test_y = test[:, :-1], test[:, -1]
-# 将输入数据转换成3D张量 [samples, timesteps, features]
+# 将输入数据转换成3D张量 [samples, timesteps, features]，[n条数据，每条数据1个步长，8个特征值]
 train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
 test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
+# 最终生成的数据形状，X:(8760,1,8)  Y:(8760,)
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
  
 # 设计网络结构
@@ -97,16 +100,16 @@ history = model.fit(train_X, train_y, epochs=50, batch_size=72, validation_data=
  
 # 使用拟合后的网络进行预测
 yhat = model.predict(test_X)
-print(yhat[0:6,:])
+print(yhat[:10,:])
 print(test_X[0:6,:])
 # xx = test_X[0:35000,:].reshape((17500,2 ,8))
 # print(xx)
 # 将3D转换为2D
 test_X = test_X.reshape((test_X.shape[0], test_X.shape[2]))
-# invert scaling for forecast
+# 拼接y，x为[y,x],即将test_X中的第一列数据替换成预测出来的yhat值
 inv_yhat = concatenate((yhat, test_X[:, 1:]), axis=1)
 print(inv_yhat)
-# 对预测数据逆缩放
+# 对替换后的inv_yhat预测数据逆缩放
 inv_yhat = scaler.inverse_transform(inv_yhat)
 inv_yhat = inv_yhat[:,0]
 # invert scaling for actual
