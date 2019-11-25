@@ -22,30 +22,35 @@ pd.set_option('display.max_colwidth',1000)
 """
 # convert series to supervised learning
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
+    # 获取特征值数量n_vars
     n_vars = 1 if type(data) is list else data.shape[1]
     df = DataFrame(data)
     print(df)
     cols, names = list(), list()
     # input sequence (t-n, ... t-1)
+    # 创建8个v(t-1)作为列名
     for i in range(n_in, 0, -1):
+        # 向列表cols中添加一个df.shift(1)的数据
         cols.append(df.shift(i))
         print(cols)
         names += [('var%d(t-%d)' % (j+1, i)) for j in range(n_vars)]
     # forecast sequence (t, t+1, ... t+n)
     for i in range(0, n_out):
+        # 向列表cols中添加一个df.shift(-1)的数据
         cols.append(df.shift(-i))
         print(cols)
         if i == 0:
         	names += [('var%d(t)' % (j+1)) for j in range(n_vars)]
         else:
         	names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars)]
-    # put it all together
     print(cols)
+    # 将列表中两个张量按照列拼接起来，list(v1,v2)->[v1,v2],其中v1向下移动了一行，此时v1,v2是监督学习型数据
     agg = concat(cols, axis=1)
     print(agg)
+    # 重定义列名
     agg.columns = names
     print(agg)
-    # drop rows with NaN values
+    # 删除空值
     if dropnan:
     	agg.dropna(inplace=True)
     return agg
