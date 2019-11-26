@@ -22,7 +22,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     df = DataFrame(data)
     cols, names = list(), list()
     # input sequence (t-n, ... t-1)
-    # 将3组输入数据依次向下移动3，2，1行，将数据加入cols列表（技巧：(n_in, 0, -1)中的-1可以倒序循环）
+    # 将3组输入数据依次向下移动3，2，1行，将数据加入cols列表（技巧：(n_in, 0, -1)中的-1指倒序循环，步长为1）
     for i in range(n_in, 0, -1):
     	cols.append(df.shift(i))
     	names += [('var%d(t-%d)' % (j+1, i)) for j in range(n_vars)]
