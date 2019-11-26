@@ -16,7 +16,7 @@ pd.set_option('display.max_columns',1000)
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_colwidth',1000)
 
-# convert series to supervised learning
+# 转换成监督数据，四列数据，3->1，三组预测一组
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     n_vars = 1 if type(data) is list else data.shape[1]
     df = DataFrame(data)
@@ -49,9 +49,8 @@ values = dataset.values
 # integer encode direction
 encoder = LabelEncoder()
 values[:,4] = encoder.fit_transform(values[:,4])
-# ensure all data is float
 values = values.astype('float32')
-# normalize features
+# 标准化/放缩 特征值在（0,1）之间
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled = scaler.fit_transform(values)
 # 用3小时数据预测一小时数据，8个特征值
@@ -94,18 +93,19 @@ pyplot.show()
 # 执行预测
 yhat = model.predict(test_X)
 test_X = test_X.reshape((test_X.shape[0], n_hours*n_features))
-# 将预测列据和后7列数据拼接
+# 将预测列据和后7列数据拼接，列数有要有
 inv_yhat = concatenate((yhat, test_X[:, -7:]), axis=1)
-print(yhat)
-print(inv_yhat)
 # 对拼接好的数据进行逆缩放
 inv_yhat = scaler.inverse_transform(inv_yhat)
 inv_yhat = inv_yhat[:,0]
-# invert scaling for actual
+
 test_y = test_y.reshape((len(test_y), 1))
+# 将真实列据和后7列数据拼接，列数有要有
 inv_y = concatenate((test_y, test_X[:, -7:]), axis=1)
+# 对拼接好的数据进行逆缩放
 inv_y = scaler.inverse_transform(inv_y)
 inv_y = inv_y[:,0]
-# calculate RMSE
+
+# 计算RMSE误差值
 rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
 print('Test RMSE: %.3f' % rmse)
