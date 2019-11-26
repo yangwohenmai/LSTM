@@ -22,23 +22,24 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     df = DataFrame(data)
     cols, names = list(), list()
     # input sequence (t-n, ... t-1)
+    # 将3组输入数据依次向下移动3，2，1行，将数据加入cols列表（技巧：(n_in, 0, -1)中的-1可以倒序循环）
     for i in range(n_in, 0, -1):
     	cols.append(df.shift(i))
     	names += [('var%d(t-%d)' % (j+1, i)) for j in range(n_vars)]
     # forecast sequence (t, t+1, ... t+n)
+    # 将一组输出数据加入cols列表（技巧：其中i=0）
     for i in range(0, n_out):
     	cols.append(df.shift(-i))
     	if i == 0:
     		names += [('var%d(t)' % (j+1)) for j in range(n_vars)]
     	else:
     		names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars)]
-    # put it all together
-    print(cols)
+    # cols列表(list)中现在有四块经过下移后的数据，将四块数据按列合并
     agg = concat(cols, axis=1)
-    print(agg)
+    # 给合并后的数据添加列名
     agg.columns = names
     print(agg)
-    # drop rows with NaN values
+    # 删除NaN值列
     if dropnan:
     	agg.dropna(inplace=True)
     return agg
@@ -46,7 +47,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
 # load dataset
 dataset = read_csv('pollution.csv', header=0, index_col=0)
 values = dataset.values
-# integer encode direction
+# 对“风向”列进行整数编码
 encoder = LabelEncoder()
 values[:,4] = encoder.fit_transform(values[:,4])
 values = values.astype('float32')
@@ -77,7 +78,7 @@ train_X = train_X.reshape((train_X.shape[0], n_hours, n_features))
 test_X = test_X.reshape((test_X.shape[0], n_hours, n_features))
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
-# design network
+# 设计网络
 model = Sequential()
 model.add(LSTM(50, input_shape=(train_X.shape[1], train_X.shape[2])))
 model.add(Dense(1))
