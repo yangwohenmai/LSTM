@@ -12,6 +12,9 @@ from keras.layers import Dense
 from keras.layers import LSTM
 import pandas as pd
 
+"""
+
+"""
 pd.set_option('display.max_columns',1000)
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_colwidth',1000)
@@ -69,7 +72,7 @@ train = values[:n_train_hours, :]
 test = values[n_train_hours:, :]
 # split into input and outputs
 n_obs = n_hours * n_features
-# 有32列数据，取前24列作为X，倒数第8列作为Y
+# 有32=(4*8)列数据，取前24=(3*8) 列作为X，倒数第8列=(第25列)作为Y
 train_X, train_y = train[:, :n_obs], train[:, -n_features]
 test_X, test_y = test[:, :n_obs], test[:, -n_features]
 print(train_X.shape, len(train_X), train_y.shape)
@@ -93,15 +96,16 @@ pyplot.show()
 
 # 执行预测
 yhat = model.predict(test_X)
+# 将数据格式化成 n行 * 24列
 test_X = test_X.reshape((test_X.shape[0], n_hours*n_features))
-# 将预测列据和后7列数据拼接，列数有要有
+# 将预测列据和后7列数据拼接，因后续逆缩放时，数据形状要符合 n行*8列 的要求
 inv_yhat = concatenate((yhat, test_X[:, -7:]), axis=1)
 # 对拼接好的数据进行逆缩放
 inv_yhat = scaler.inverse_transform(inv_yhat)
 inv_yhat = inv_yhat[:,0]
 
 test_y = test_y.reshape((len(test_y), 1))
-# 将真实列据和后7列数据拼接，列数有要有
+# 将真实列据和后7列数据拼接，因后续逆缩放时，数据形状要符合 n行*8列 的要求
 inv_y = concatenate((test_y, test_X[:, -7:]), axis=1)
 # 对拼接好的数据进行逆缩放
 inv_y = scaler.inverse_transform(inv_y)
