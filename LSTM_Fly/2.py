@@ -1,3 +1,4 @@
+# LSTM for international airline passengers problem with window regression framing
 import numpy
 import matplotlib.pyplot as plt
 from pandas import read_csv
@@ -7,95 +8,76 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
-#matplotlib inline
+import pandas as pd
 
-# load the dataset
-dataframe = read_csv('international-airline-passengers.csv', usecols=[1], engine='python', skipfooter=3)
-dataset = dataframe.values
-# å°†æ•´å‹å˜ä¸ºfloat
-dataset = dataset.astype('float32')
+pd.set_option('display.max_columns',1000)
+pd.set_option('display.width', 1000)
+pd.set_option('display.max_colwidth',1000)
 
-plt.plot(dataset)
-plt.show()
-
-
-# Xæ˜¯ç»™å®šæ—¶é—´(t)çš„ä¹˜å®¢äººæ•°ï¼ŒYæ˜¯ä¸‹ä¸€æ¬¡(t + 1)çš„ä¹˜å®¢äººæ•°ã€‚
-# å°†å€¼æ•°ç»„è½¬æ¢ä¸ºæ•°æ®é›†çŸ©é˜µ,look_backæ˜¯æ­¥é•¿ã€‚
+# convert an array of values into a dataset matrix
 def create_dataset(dataset, look_back=1):
-    dataX, dataY = [], []
-    for i in range(len(dataset)-look_back-1):
-        a = dataset[i:(i+look_back), 0]
-        # XæŒ‰ç…§é¡ºåºå–å€¼
-        dataX.append(a)
-        # Yå‘åç§»åŠ¨ä¸€ä½å–å€¼
-        dataY.append(dataset[i + look_back, 0])
-    return numpy.array(dataX), numpy.array(dataY)
-
+	dataX, dataY = [], []
+	for i in range(len(dataset)-look_back-1):
+		a = dataset[i:(i+look_back), 0]
+		dataX.append(a)
+		dataY.append(dataset[i + look_back, 0])
+	return numpy.array(dataX), numpy.array(dataY)
 # fix random seed for reproducibility
 numpy.random.seed(7)
-
-
-# æ•°æ®ç¼©æ”¾
+# load the dataset
+dataframe = read_csv('airline-passengers.csv', usecols=[1], engine='python')
+dataset = dataframe.values
+dataset = dataset.astype('float32')
+# Ëõ·ÅÊı¾İ
 scaler = MinMaxScaler(feature_range=(0, 1))
 dataset = scaler.fit_transform(dataset)
-
-
-# å°†æ•°æ®æ‹†åˆ†æˆè®­ç»ƒå’Œæµ‹è¯•ï¼Œ2/3ä½œä¸ºè®­ç»ƒæ•°æ®
+# ·Ö¸î2/3Êı¾İ×÷Îª²âÊÔ
 train_size = int(len(dataset) * 0.67)
 test_size = len(dataset) - train_size
 train, test = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
-
-
-# æ„å»ºç›‘ç£å­¦ä¹ å‹æ•°æ®
-look_back = 1
+# Ô¤²âÊı¾İ²½³¤Îª3,Èı¸öÔ¤²âÒ»¸ö£¬3->1
+look_back = 3
 trainX, trainY = create_dataset(train, look_back)
 testX, testY = create_dataset(test, look_back)
-
-
-# æ•°æ®é‡æ„ä¸º3D [samples, time steps, features]
+# reshape ÊäÈëÊı¾İ [samples, time steps, features]
 trainX = numpy.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
 testX = numpy.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
-
-
-# create and fit the LSTM network
+# ¹¹½¨ LSTM ÍøÂç
 model = Sequential()
 model.add(LSTM(4, input_shape=(1, look_back)))
 model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
 model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
-
-
-# å¼€å§‹é¢„æµ‹
+# ¶ÔÑµÁ·Êı¾İµÄY½øĞĞÔ¤²â
 trainPredict = model.predict(trainX)
+# ¶Ô²âÊÔÊı¾İµÄY½øĞĞÔ¤²â
 testPredict = model.predict(testX)
-
-# é€†ç¼©æ”¾é¢„æµ‹å€¼
+# invert predictions
 trainPredict = scaler.inverse_transform(trainPredict)
 trainY = scaler.inverse_transform([trainY])
 testPredict = scaler.inverse_transform(testPredict)
 testY = scaler.inverse_transform([testY])
-
-# ä½ ç®—è¯¯å·®
+# calculate root mean squared error
 trainScore = math.sqrt(mean_squared_error(trainY[0], trainPredict[:,0]))
 print('Train Score: %.2f RMSE' % (trainScore))
 testScore = math.sqrt(mean_squared_error(testY[0], testPredict[:,0]))
 print('Test Score: %.2f RMSE' % (testScore))
 
-
-# shift train predictions for plotting
+# ¹¹ÔìÒ»¸öºÍdataset¸ñÊ½ÏàÍ¬µÄÊı×é£¬¹²145ĞĞ£¬datasetÎª×ÜÊı¾İ¼¯
 trainPredictPlot = numpy.empty_like(dataset)
+# ÓÃnanÌî³äÊı×é
 trainPredictPlot[:, :] = numpy.nan
+# ½«ÑµÁ·¼¯Ô¤²âµÄYÌí¼Ó½øÊı×é£¬´ÓµÚ3Î»µ½µÚ93+3Î»£¬¹²93ĞĞ
 trainPredictPlot[look_back:len(trainPredict)+look_back, :] = trainPredict
 
 # shift test predictions for plotting
 testPredictPlot = numpy.empty_like(dataset)
 testPredictPlot[:, :] = numpy.nan
+# ½«²âÊÔ¼¯Ô¤²âµÄYÌí¼Ó½øÊı×é£¬´ÓµÚ94+4Î»µ½×îºó£¬¹²44ĞĞ
 testPredictPlot[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :] = testPredict
 
-# plot baseline and predictions
+# »­Í¼
 plt.plot(scaler.inverse_transform(dataset))
 plt.plot(trainPredictPlot)
 plt.plot(testPredictPlot)
 plt.show()
-
-
