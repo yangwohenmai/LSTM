@@ -13,7 +13,14 @@ from keras.layers import LSTM
 import pandas as pd
 
 """
-
+本文是LSTM多元预测
+用3个步长的数据预测1个步长的数据
+包含：
+对数据进行缩放，缩放格式为n行*8列，对枚举列（风向）进行数字编码
+构造3->1的监督学习数据
+构造网络开始预测
+将预测结果重新拼接为n行*8列数据
+数据逆缩放，求RSME误差
 """
 pd.set_option('display.max_columns',1000)
 pd.set_option('display.width', 1000)
@@ -37,7 +44,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     		names += [('var%d(t)' % (j+1)) for j in range(n_vars)]
     	else:
     		names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars)]
-    # cols列表(list)中现在有四块经过下移后的数据，将四块数据按列合并
+    # cols列表(list)中现在有四块经过下移后的数据(即：df(-3),df(-2),df(-1),df)，将四块数据按列 并排合并
     agg = concat(cols, axis=1)
     # 给合并后的数据添加列名
     agg.columns = names
