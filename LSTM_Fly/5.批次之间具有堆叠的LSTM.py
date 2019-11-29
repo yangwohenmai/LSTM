@@ -9,6 +9,7 @@ from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 """
+差异：
 model.add(LSTM(4, batch_input_shape=(batch_size, look_back, 1), stateful=True, return_sequences=True))
 model.add(LSTM(4, batch_input_shape=(batch_size, look_back, 1), stateful=True))
 """

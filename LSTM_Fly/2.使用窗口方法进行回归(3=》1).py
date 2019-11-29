@@ -8,6 +8,14 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
+"""
+X1	X2	X3	Y
+112	118	132	129
+118	132	129	121
+132	129	121	135
+129	121	135	148
+121	135	148	148
+"""
 # convert an array of values into a dataset matrix
 def create_dataset(dataset, look_back=1):
 	dataX, dataY = [], []

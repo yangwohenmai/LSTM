@@ -9,7 +9,7 @@ from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 """
-# reshape input to be [samples, time steps, features]
+# 差异
 trainX = numpy.reshape(trainX, (trainX.shape[0], trainX.shape[1], 1))
 testX = numpy.reshape(testX, (testX.shape[0], testX.shape[1], 1))
 """

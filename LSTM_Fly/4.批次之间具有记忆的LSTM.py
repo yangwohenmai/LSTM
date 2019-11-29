@@ -8,6 +8,14 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
+"""
+for i in range(100):
+	model.fit(trainX, trainY, epochs=1, batch_size=batch_size, verbose=2, shuffle=False)
+	model.reset_states()
+    
+model.add(LSTM(4, batch_input_shape=(batch_size, time_steps, features), stateful=True))
+model.predict(trainX, batch_size=batch_size)
+"""
 # convert an array of values into a dataset matrix
 def create_dataset(dataset, look_back=1):
 	dataX, dataY = [], []
