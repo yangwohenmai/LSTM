@@ -9,10 +9,12 @@ from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 """
+每次预测执行1个周期，循环执行100次，每次循环保留网络状态
 for i in range(100):
 	model.fit(trainX, trainY, epochs=1, batch_size=batch_size, verbose=2, shuffle=False)
 	model.reset_states()
-    
+
+
 model.add(LSTM(4, batch_input_shape=(batch_size, time_steps, features), stateful=True))
 model.predict(trainX, batch_size=batch_size)
 """
