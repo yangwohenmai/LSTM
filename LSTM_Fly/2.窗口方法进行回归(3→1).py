@@ -17,8 +17,19 @@ X1	X2	X3	Y
 132	129	121	135
 129	121	135	148
 121	135	148	148
+
 数据形状：
-[93,1,3] -> [93,]
+x -> y = [93,1,3] -> [93,1]
+x = [[[x1,x2,x3]], 
+     [[x1,x2,x3]], 
+     [[x1,x2,x3]], 
+     ...]
+
+y = [[y1],
+     [y2],
+     [y3], 
+     ...]
+   
 input_shape=(1,3)
 代码变动部分：
 look_back = 3
@@ -37,7 +48,7 @@ def create_dataset(dataset, look_back=1):
 	return numpy.array(dataX), numpy.array(dataY)
 # fix random seed for reproducibility
 numpy.random.seed(7)
-# load the dataset
+# 加载数据
 dataframe = read_csv('airline-passengers.csv', usecols=[1], engine='python')
 dataset = dataframe.values
 dataset = dataset.astype('float32')
