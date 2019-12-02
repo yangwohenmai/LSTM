@@ -10,15 +10,18 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import pandas as pd
 """
-用三列数据预测一列数据
-变动部分：
-look_back = 3
+用三个步长数据预测一个数据，数据类型：
 X1	X2	X3	Y
 112	118	132	129
 118	132	129	121
 132	129	121	135
 129	121	135	148
 121	135	148	148
+数据形状：
+[93,1,3] -> [93,]
+input_shape=(1,3)
+代码变动部分：
+look_back = 3
 """
 pd.set_option('display.max_columns',1000)
 pd.set_option('display.width', 1000)

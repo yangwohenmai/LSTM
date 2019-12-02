@@ -9,6 +9,7 @@ from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 """
+用一个步长预测一个，监督学习数据类型1->1
 X		    Y
 112		118
 118		132
