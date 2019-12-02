@@ -9,11 +9,13 @@ from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 """
-每次预测执行1个周期，循环执行100次，每次循环保留网络状态
+之前是网络训练100个周期
+model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
+
+每次网络训练1个周期，循环执行100次，每次循环重置网络状态
 for i in range(100):
 	model.fit(trainX, trainY, epochs=1, batch_size=batch_size, verbose=2, shuffle=False)
 	model.reset_states()
-
 
 model.add(LSTM(4, batch_input_shape=(batch_size, time_steps, features), stateful=True))
 model.predict(trainX, batch_size=batch_size)
@@ -73,11 +75,14 @@ print('Test Score: %.2f RMSE' % (testScore))
 trainPredictPlot = numpy.empty_like(dataset)
 trainPredictPlot[:, :] = numpy.nan
 trainPredictPlot[look_back:len(trainPredict)+look_back, :] = trainPredict
+
 # shift test predictions for plotting
 testPredictPlot = numpy.empty_like(dataset)
 testPredictPlot[:, :] = numpy.nan
+# 将测试集预测的Y添加进数组，从第94+4位到最后，共44行
 testPredictPlot[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :] = testPredict
-# plot baseline and predictions
+
+# 画图
 plt.plot(scaler.inverse_transform(dataset))
 plt.plot(trainPredictPlot)
 plt.plot(testPredictPlot)

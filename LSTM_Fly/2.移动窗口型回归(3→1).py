@@ -63,7 +63,7 @@ train, test = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
 look_back = 3
 trainX, trainY = create_dataset(train, look_back)
 testX, testY = create_dataset(test, look_back)
-# reshape 输入数据 [samples, time steps, features]
+# 重构输入数据格式 [samples, time steps, features] = [93,1,3]
 trainX = numpy.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
 testX = numpy.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
 # 构建 LSTM 网络
@@ -76,25 +76,25 @@ model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
 trainPredict = model.predict(trainX)
 # 对测试数据的Y进行预测
 testPredict = model.predict(testX)
-# invert predictions
+# 对数据进行逆缩放
 trainPredict = scaler.inverse_transform(trainPredict)
 trainY = scaler.inverse_transform([trainY])
 testPredict = scaler.inverse_transform(testPredict)
 testY = scaler.inverse_transform([testY])
-# calculate root mean squared error
+# 计算RMSE误差
 trainScore = math.sqrt(mean_squared_error(trainY[0], trainPredict[:,0]))
 print('Train Score: %.2f RMSE' % (trainScore))
 testScore = math.sqrt(mean_squared_error(testY[0], testPredict[:,0]))
 print('Test Score: %.2f RMSE' % (testScore))
 
-# 构造一个和dataset格式相同的数组，共145行，dataset为总数据集
+# 构造一个和dataset格式相同的数组，共145行，dataset为总数据集，把预测的93行训练数据存进去
 trainPredictPlot = numpy.empty_like(dataset)
 # 用nan填充数组
 trainPredictPlot[:, :] = numpy.nan
 # 将训练集预测的Y添加进数组，从第3位到第93+3位，共93行
 trainPredictPlot[look_back:len(trainPredict)+look_back, :] = trainPredict
 
-# shift test predictions for plotting
+# 构造一个和dataset格式相同的数组，共145行，把预测的后44行测试数据数据放进去
 testPredictPlot = numpy.empty_like(dataset)
 testPredictPlot[:, :] = numpy.nan
 # 将测试集预测的Y添加进数组，从第94+4位到最后，共44行
