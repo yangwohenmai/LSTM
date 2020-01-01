@@ -45,7 +45,7 @@ testX = numpy.reshape(testX, (testX.shape[0], testX.shape[1], 1))
 # 构建 LSTM 网络
 batch_size = 1
 model = Sequential()
-# 堆叠两层网络，return_sequences=True表示将上层的输入形状向下继续传递
+# 堆叠两层网络，参数return_sequences=True表示将上层的输入形状向下继续传递
 model.add(LSTM(4, batch_input_shape=(batch_size, look_back, 1), stateful=True, return_sequences=True))
 model.add(LSTM(4, batch_input_shape=(batch_size, look_back, 1), stateful=True))
 model.add(Dense(1))
