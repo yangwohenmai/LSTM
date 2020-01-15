@@ -56,6 +56,7 @@ model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
 # 网络训练一个周期，循环训练100次
 for i in range(100):
+    #shuffle=False训练时不打数据乱顺序
 	model.fit(trainX, trainY, epochs=1, batch_size=batch_size, verbose=2, shuffle=False)
     # 每次训练完都重置网络状态
 	model.reset_states()
