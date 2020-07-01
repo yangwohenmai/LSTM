@@ -1,3 +1,6 @@
+"""
+
+"""
 from numpy import loadtxt
 from numpy import mean
 from matplotlib import pyplot
@@ -17,6 +20,7 @@ def evaluate_once(bs_ref, template, trainX, trainy, testX, testy):
     predict_proba输出的结果可能是n行k列的数组，n是要预测数据的行数，k表示有k种类型的输出，
     如果输出结果有4中类型：A,B,C,D，则k=4，在预测前要将A,B,C,D转化为1,2,3,4表示的数值，
     输出的k列按照类型对应的数值大小从0到n排列，即输出k列中，第1列表示类型1对应的概率，第k列表示4对应的概率
+    本质上排序规则是根据self.classes_进行排序：https://www.jb51.net/article/189604.htm
     """
     # 每行第一列表示结果是0(非臭氧日)的概率，第二列表示输出结果是1(臭氧日)的概率
     probs = model.predict_proba(testX)
