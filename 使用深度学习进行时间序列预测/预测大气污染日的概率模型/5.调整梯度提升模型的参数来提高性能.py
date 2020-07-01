@@ -1,5 +1,6 @@
 """
-
+本程序通过对例4中的梯度提升模型调整参数，来提高预测的准确率。
+分别调整了深度，学习率，采样集，和树数，通过brier skill score值来评价结果
 """
 from numpy import loadtxt
 from numpy import mean
@@ -35,7 +36,7 @@ def evaluate_once(bs_ref, template, trainX, trainy, testX, testy):
 # 重复评估给定sklearn模型n次，计算BSS平均分数，并返回这些分数进行分析
 def evaluate(bs_ref, model, trainX, trainy, testX, testy, n=10):
     scores = [evaluate_once(bs_ref, model, trainX, trainy, testX, testy) for _ in range(n)]
-    print('=> %s, bss=%.6f' % (type(model), mean(scores)))
+    print('>%s, bss=%.6f' % (type(model), mean(scores)))
     return scores
 
 # 计算朴素预测的Brier分数，以便能够计算新模型的BSS
@@ -51,35 +52,34 @@ def calculate_naive(train, test, testy):
 # 加载数据
 train = loadtxt('train.csv', delimiter=',')
 test = loadtxt('test.csv', delimiter=',')
-# 把数据拆分成训练集和测试集，输入和输出
+# 把数据拆分成训练集和测试集，构造 监督学习类型 的输入和输出数据
+# 第一天的前71列数据作为输入，对应第二天的最后一列数据作为输出
 trainX, trainy, testX, testy = train[:,:-1],train[:,-1],test[:,:-1],test[:,-1]
-# 计算朴素预测的Brier分数，以便能够计算新模型的BSS
 bs_ref = calculate_naive(train, test, testy)
 
-# 以下评估一系列集成决策树的结果
+
+# 以下部分评估不同参数下集成决策树的结果
 scores, names = list(), list()
-# 树数设置为100
-n_trees=100
-# Bagging决策树（BaggingClassifier）
-model = BaggingClassifier(n_estimators=n_trees)
+# 基线
+model = GradientBoostingClassifier(learning_rate=0.1, n_estimators=100, subsample=1.0, max_depth=3)
 avg_bss = evaluate(bs_ref, model, trainX, trainy, testX, testy)
 scores.append(avg_bss)
-names.append('bagging')
-# 额外决策树（ExtraTreesClassifier）
-model = ExtraTreesClassifier(n_estimators=n_trees)
+names.append('base')
+# 较低的学习率和更多的树
+model = GradientBoostingClassifier(learning_rate=0.01, n_estimators=500, subsample=1.0, max_depth=3)
 avg_bss = evaluate(bs_ref, model, trainX, trainy, testX, testy)
 scores.append(avg_bss)
-names.append('extra')
-# 随机梯度提升（GradientBoostingClassifier）
-model = GradientBoostingClassifier(n_estimators=n_trees)
+names.append('lr')
+# 增加的最大树深度和较小的数据集采样
+model = GradientBoostingClassifier(learning_rate=0.1, n_estimators=100, subsample=0.7, max_depth=7)
 avg_bss = evaluate(bs_ref, model, trainX, trainy, testX, testy)
 scores.append(avg_bss)
-names.append('gbm')
-# 随机森林（RandomForestClassifier）
-model = RandomForestClassifier(n_estimators=n_trees)
+names.append('depth')
+# 所有的都调整
+model = GradientBoostingClassifier(learning_rate=0.01, n_estimators=500, subsample=0.7, max_depth=7)
 avg_bss = evaluate(bs_ref, model, trainX, trainy, testX, testy)
 scores.append(avg_bss)
-names.append('rf')
-# 画出结果图
+names.append('all')
+# 画图
 pyplot.boxplot(scores, labels=names)
 pyplot.show()
