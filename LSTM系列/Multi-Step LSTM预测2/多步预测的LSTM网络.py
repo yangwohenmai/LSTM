@@ -174,7 +174,7 @@ series = read_csv('data_set/shampoo-sales.csv', header=0, parse_dates=[0], index
 n_lag = 1
 n_seq = 3
 n_test = 10
-n_epochs = 1500
+n_epochs = 15
 n_batch = 1
 n_neurons = 1
 # 准备数据
