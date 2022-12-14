@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 #——————————————————导入数据——————————————————————
 f = open('dataset_1.csv')
@@ -14,7 +16,7 @@ data = data[::-1]#反转，使数据按照日期先后顺序排列
 # plt.plot(data)
 # plt.show()
 normalize_data = (data - np.mean(data)) / np.std(data)#标准化
-normalize_data = normalize_data[:, np.newaxis]#增加维度
+normalize_data = normalize_data[:, np.newaxis]#增加1个维度
 
 #———————————————————形成训练集—————————————————————
 time_step = 20      #时间步
@@ -31,24 +33,30 @@ for i in range(len(normalize_data) - time_step - 1):
     train_x.append(x.tolist())
     train_y.append(y.tolist())
 
-X = tf.placeholder(tf.float32, [None, time_step, input_size])   #每批次输入网络的tensor
-Y = tf.placeholder(tf.float32, [None, time_step, output_size])  #每批次tensor对应的标签
+# 定义每个X sample的形状(?, time_step, input_size)
+X = tf.placeholder(tf.float32, [None, time_step, input_size])
+# 定义每个Y sample的形状(?, time_step, output_size)
+Y = tf.placeholder(tf.float32, [None, time_step, output_size])
 #——————————————————定义神经网络变量——————————————————
 #输入层、输出层权重、偏置
 weights = {
     'in': tf.Variable(tf.random_normal([input_size, rnn_unit])),
     'out': tf.Variable(tf.random_normal([rnn_unit, 1]))
 }
+print(weights)
 biases = {
     'in': tf.Variable(tf.constant(0.1, shape=[rnn_unit, ])),
     'out': tf.Variable(tf.constant(0.1, shape=[1, ]))
 }
+print(biases)
 
 #参数：输入网络批次数目
 def lstm(batch):#参数：输入网络批次数目
     w_in = weights['in']
     b_in = biases['in']
+    print(X)
     input = tf.reshape(X, [-1, input_size])#需要将tensor转成2维进行计算，计算后的结果作为隐藏层的输入
+    print(input)
     input_rnn = tf.matmul(input, w_in) + b_in
     input_rnn = tf.reshape(input_rnn, [-1, time_step, rnn_unit])#将tensor转成3维，作为lstm cell的输入
     cell = tf.nn.rnn_cell.MultiRNNCell([tf.nn.rnn_cell.BasicLSTMCell(rnn_unit) for i in range(lstm_layers)])
@@ -91,7 +99,7 @@ def train_lstm():
         print("The train has finished")
 
 
-#train_lstm()
+train_lstm()
 
 
 def prediction():
@@ -116,6 +124,7 @@ def prediction():
         plt.plot(list(range(len(normalize_data))), normalize_data, color='b')
         plt.plot(list(range(len(normalize_data), len(normalize_data) + len(predict))), predict, color='r')
         plt.show()
+    input()
 
 
 prediction()
